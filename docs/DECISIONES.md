@@ -285,6 +285,24 @@ M1–M7 (specs completas en `docs/MEMORIA.md`, sección "Auditoría"):
   DH↔Stark, Vorn↔Stark — los resuelve el multi-etapa). No hay más pares con DOS caminos
   pintados: el mini-bloque fue solo el par Arvandill↔Sandquill.
 
+## 🌐 Publicación (2026-11-03 — elegida: GitHub Pages)
+
+- **Hosting: GitHub Pages** sobre el repo público
+  `github.com/facilestapps-creator/el-camino-del-heroe` (elegido por el usuario que ya
+  tenía cuenta de GitHub; Cloudflare también estaba disponible). URL en vivo:
+  `https://facilestapps-creator.github.io/el-camino-del-heroe/`.
+- **Acceso desde el agente: clave SSH** (`ssh-keygen -t ed25519` en la máquina del
+  usuario, pública agregada una sola vez en github.com). Alternativa "subida por
+  navegador" descartada: con SSH el agente publica futuros cambios solo (un
+  `git push` y GitHub Pages redespliega solo).
+- **git**: repo local inicializado 2026-11-03 (rama `main`, commit de estado inicial).
+  Publicar = `git add -A && git commit && git push`.
+- **Repo público** (requerido por Pages gratis): el código es visible, **los datos de
+  hábitos no** — viven en el localStorage de cada navegador y nunca se suben.
+- App 100 % estática (HTML/CSS/JS + `data/` + `assets/`): sirve cualquier hosting
+  estático; los ES modules funcionan porque el servidor envía `.js` con MIME correcto
+  (verificado en vivo: 200 + MIME OK en todos los assets).
+
 ## ⏳ Pendientes / diferidos
 
 - **journey.json (15 hitos)** — diferido: el viaje ya funciona (Fase 2 ✓). Los hitos se

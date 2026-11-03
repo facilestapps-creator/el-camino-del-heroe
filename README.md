@@ -14,6 +14,14 @@ python3 -m http.server 8000
 
 Luego abrir en el navegador: http://localhost:8000
 
+## Publicación
+
+- **En vivo**: https://facilestapps-creator.github.io/el-camino-del-heroe/
+- Hosting: **GitHub Pages** (repo: `github.com/facilestapps-creator/el-camino-del-heroe`,
+  rama `main`, deploy automático en cada push).
+- Para publicar cambios: `git add -A && git commit -m "msg" && git push` (SSH ya
+  configurado en esta máquina).
+
 ## Estructura
 
 ```

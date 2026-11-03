@@ -129,11 +129,21 @@ consola sin errores en todos.
   recargada: consola limpia, destinos OK (Starkrock desde Sandquill ahora multi-etapa).
   Mapa de referencia con colores: `/tmp/opencode/rutas-finales.png`.
 
+### Publicar online ✓ (2026-11-03)
+
+- **GitHub Pages en vivo**: https://facilestapps-creator.github.io/el-camino-del-heroe/
+- Repo `github.com/facilestapps-creator/el-camino-del-heroe` (público), rama `main`,
+  deploy automático en cada push. **git init** del proyecto + clave SSH configurada en la
+  máquina (`~/.ssh/id_ed25519`) — publica el agente sin intervención.
+- Verificado en vivo: HTTP 200 con MIME correctos (js/json/css/webp), `world.json` remoto
+  con 9 rutas, app navega (Hoy ↔ El camino, 6 destinos con las 2 filas de Sandquill),
+  **consola sin errores ni warnings**, localStorage funcionando en el dominio.
+- **Los datos del usuario NO se suben**: quedan en el localStorage de cada navegador.
+
 ## Pendientes (en este orden)
 
-1. ~~Barrido final de memoria + docs~~ **HECHO (2026-11-03)**. OK del usuario dado →
-   **ARRANCANDO: Publicar online** (mini-bloque en curso).
-2. **App instalable**
+1. ~~Barrido final~~ ✓ · ~~**Publicar online**~~ **✓ (2026-11-03)** → siguiente:
+2. **App instalable** (mini-bloque siguiente, esperando OK/plan)
 3. **Historial**
 4. **Hitos** (`journey.json`, diferido hasta que el viaje funcione)
 5. **Perseguidor** (último)

@@ -491,6 +491,18 @@ repetirse en cualquier revisión de rutas.
   `.md`; `world.json`/`texts.json`/`habits.json` válidos. El usuario aprobó el corte y
   **dio OK para arrancar el roadmap**: 1. ~~Publicar online~~ → 2. App instalable →
   3. Historial → 4. Hitos → 5. Perseguidor (cada uno en mini-bloques con OK).
+- **Mini-bloque "Publicar online" COMPLETO (2026-11-03)**: **GitHub Pages en vivo**
+  → https://facilestapps-creator.github.io/el-camino-del-heroe/ . Flujo: elegido por el
+  usuario (cuenta GitHub propia; también tenía Cloudflare), `git init` rama `main` +
+  commit inicial, clave SSH `~/.ssh/id_ed25519` (el usuario la pegó una vez en GitHub),
+  repo `facilestapps-creator/el-camino-del-heroe` (público) creado por el usuario,
+  push OK (1er intento: error interno transitorio de GitHub → retry OK), Pages
+  activado por el usuario (Settings → Pages → main/root). **Verificado en vivo**:
+  HTTP 200 con MIME correctos (js/json/css/webp), `world.json` remoto = 9 rutas, app
+  navega con **consola limpia** (6 destinos, filas Bahía/Bosque), localStorage OK en el
+  dominio, captura tomada. Docs sincronizados (README con URL + cómo publicar,
+  ROADMAP "Publicar online ✓", DECISIONES sección "🌐 Publicación"). Pendiente:
+  commit/push del sync de docs → **App instalable** (esperando OK/plan).
 - **Servidor**: `python3 -m http.server 8000` desde `habit-quest/` (o
   `/tmp/opencode/serve_no_cache.py` en :8000 para pruebas sin caché). Verificar que esté
   vivo antes de probar (puede haber caído entre sesiones).
