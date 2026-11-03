@@ -1,0 +1,29 @@
+{
+  "appName": "El camino del héroe",
+  "characterName": "Personaje",
+  "goalName": "Nombre de la meta",
+  "texts": {
+    "tagline": "Tu aventura diaria",
+    "welcome": "Bienvenido, aventurero",
+    "habitsTitle": "Hoy",
+    "pointsLabel": "Puntos de hoy",
+    "balanceLabel": "Disponible",
+    "habitStart": "Empezar",
+    "habitMin": "Minimo",
+    "habitComplete": "Completo",
+    "exportLabel": "Exportar",
+    "importLabel": "Importar",
+    "importConfirmMessage": "Esto reemplaza TODOS tus datos actuales por los del archivo. ¿Continuar?",
+    "importInvalidMessage": "El archivo no es un respaldo válido.",
+    "lastBackupDays": "Último respaldo: hace {days} días",
+    "lastBackupOneDay": "Último respaldo: hace 1 día",
+    "lastBackupToday": "Último respaldo: hoy",
+    "lastBackupNever": "Último respaldo: nunca",
+    "confirmAcceptLabel": "Aceptar",
+    "confirmCancelLabel": "Cancelar",
+    "sendLabel": "Enviar",
+    "pendingLabel": "pendientes",
+    "habitLocked": "Enviado",
+    "stepsRule": "{stepsPerPoint} pasos = 1 punto"
+  }
+}

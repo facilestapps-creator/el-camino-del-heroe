@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <p class="character-name" id="character-name"></p>
+    <h1 id="app-name"></h1>
+    <p class="goal-name" id="goal-name"></p>
+
+    <nav class="view-toggle" id="view-toggle">
+      <button type="button" class="view-btn active" id="view-hoy-btn"></button>
+      <button type="button" class="view-btn" id="view-world-btn"></button>
+    </nav>
+
+    <section class="habits" id="view-hoy">
+      <h2 id="habits-title"></h2>
+      <div id="habits-list"></div>
+      <button type="button" class="send-btn" id="send-btn"></button>
+      <div class="points">
+        <span id="points-total"></span>
+        <span id="points-balance"></span>
+      </div>
+
+      <div class="backup">
+        <button type="button" class="backup-btn" id="backup-export"></button>
+        <label class="backup-btn" id="backup-import-label" for="backup-file-input"></label>
+        <input type="file" id="backup-file-input" accept="application/json,.json" hidden />
+      </div>
+      <p class="backup-last" id="backup-last" hidden></p>
+      <p class="backup-error" id="backup-error" hidden></p>
+    </section>
+
+    <section class="world" id="view-world" hidden>
+      <div class="world-head">
+        <span id="world-location"></span>
+        <span id="world-balance"></span>
+      </div>
+      <div class="map-wrap">
+        <img id="world-map-img" alt="" />
+        <div class="map-marker" id="map-marker" hidden></div>
+      </div>
+      <div id="world-panel"></div>
+    </section>
+  </main>
+
+  <!-- M4: cartel genérico de confirmación (respaldo, viajes, etc.) -->
+  <div class="confirm-overlay" id="confirm-overlay" hidden>
+    <div class="confirm-box">
+      <p class="confirm-text" id="confirm-text"></p>
+      <div class="confirm-actions" id="confirm-actions"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Fase 2: modal de dragones (moneda al aire) -->
+  <div class="dragon-overlay" id="dragon-overlay" hidden>
+    <div class="dragon-modal">
+      <p class="dragon-title" id="dragon-title"></p>
+      <div class="coin" id="coin"><div class="coin-inner"><div class="coin-face coin-heads">🐉</div><div class="coin-face coin-tails">🍀</div></div></div>
+      <p class="dragon-result" id="dragon-result"></p>
+      <button type="button" class="habit-btn complete" id="dragon-accept"></button>
+    </div>
+  </div>
+</body>
+</html>

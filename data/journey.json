@@ -1,0 +1,19 @@
+{
+  "milestones": [
+    { "id": "hito-01", "name": "Hito 01 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 35, "image": "assets/map/hito-01.png" },
+    { "id": "hito-02", "name": "Hito 02 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 80, "image": "assets/map/hito-02.png" },
+    { "id": "hito-03", "name": "Hito 03 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 140, "image": "assets/map/hito-03.png" },
+    { "id": "hito-04", "name": "Hito 04 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 205, "image": "assets/map/hito-04.png" },
+    { "id": "hito-05", "name": "Hito 05 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 285, "image": "assets/map/hito-05.png" },
+    { "id": "hito-06", "name": "Hito 06 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 380, "image": "assets/map/hito-06.png" },
+    { "id": "hito-07", "name": "Hito 07 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 480, "image": "assets/map/hito-07.png" },
+    { "id": "hito-08", "name": "Hito 08 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 600, "image": "assets/map/hito-08.png" },
+    { "id": "hito-09", "name": "Hito 09 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 725, "image": "assets/map/hito-09.png" },
+    { "id": "hito-10", "name": "Hito 10 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 860, "image": "assets/map/hito-10.png" },
+    { "id": "hito-11", "name": "Hito 11 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 1010, "image": "assets/map/hito-11.png" },
+    { "id": "hito-12", "name": "Hito 12 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 1170, "image": "assets/map/hito-12.png" },
+    { "id": "hito-13", "name": "Hito 13 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 1345, "image": "assets/map/hito-13.png" },
+    { "id": "hito-14", "name": "Hito 14 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 1530, "image": "assets/map/hito-14.png" },
+    { "id": "hito-15", "name": "Hito 15 - nombre pendiente", "description": "Descripcion pendiente", "requiredPoints": 1730, "image": "assets/map/hito-15.png" }
+  ]
+}

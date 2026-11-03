@@ -1,0 +1,608 @@
+/* Habit Quest - Fase 0/1: estilos base */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.character-name {
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+#app-name {
+  font-size: 2.5rem;
+  margin: 0.5rem 0;
+}
+
+.goal-name {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.habits {
+  margin-top: 2rem;
+}
+
+#habits-title {
+  font-size: 1.25rem;
+}
+
+.habit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  background: #1e293b;
+  text-align: left;
+}
+
+.habit-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.habit-label {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.habit-desc {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.habit-desc-full {
+  color: #64748b;
+}
+
+.habit-btn {
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  border: none;
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: 120px;
+}
+
+.habit-btn.state-1 {
+  background: #4ade80;
+}
+
+.habit-btn.state-2 {
+  background: #facc15;
+}
+
+/* Experimento: hábito con dos botones directos (style "direct") */
+
+.habit-direct .habit-info {
+  flex-shrink: 0;
+}
+
+.habit-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.habit-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.habit-btn.habit-btn-direct {
+  min-width: 0;
+  width: 100%;
+  padding: 0.65rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.habit-action-desc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.points {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* M3: pendientes de enviar (se distinguen de los ya enviados). */
+.points-pending {
+  color: #facc15;
+  font-weight: 700;
+}
+
+.points-pending-count {
+  background: #3f3f1f;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+/* M3: botón Enviar bajo la lista de hábitos. */
+.send-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 12px;
+  background: #4ade80;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.send-btn:disabled {
+  background: #334155;
+  color: #64748b;
+}
+
+/* M3: hábito ya enviado queda bloqueado el día. */
+.habit.locked {
+  opacity: 0.6;
+}
+
+.habit-locked-tag {
+  align-self: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #334155;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  flex-shrink: 0;
+}
+
+/* M3: pasos con ingreso manual (total del día). */
+.habit-number {
+  align-items: center;
+}
+
+.habit-number-rule {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.habit-steps {
+  width: 110px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #f1f5f9;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.habit-steps:disabled {
+  color: #64748b;
+}
+
+#points-balance {
+  color: #4ade80;
+}
+
+/* Bloque B — Respaldo (mini-bloque 1: botones) */
+
+.backup {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.backup-btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid #38bdf8;
+  background: transparent;
+  color: #38bdf8;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.backup-error {
+  color: #f87171;
+  font-size: 0.85rem;
+  margin: 0.6rem 0 0;
+  text-align: center;
+}
+
+/* M6: "Último respaldo: …" bajo los botones. */
+.backup-last {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin: 0.6rem 0 0;
+  text-align: center;
+}
+
+.backup-last--stale {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+/* M4 — Cartel genérico de confirmación (respaldo, viajes, etc.) */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+}
+
+.confirm-overlay[hidden] {
+  display: none;
+}
+
+.confirm-box {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 1.25rem;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+}
+
+.confirm-text {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.confirm-text:empty {
+  display: none;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.confirm-btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  border: none;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.confirm-cancel {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.confirm-accept {
+  background: #f87171;
+  color: #0f172a;
+}
+
+.confirm-accept.confirm-go {
+  background: #38bdf8;
+}
+
+/* Fase 2 — Vista conmutada Hoy / El camino */
+
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.view-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid #334155;
+  background: transparent;
+  color: #94a3b8;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.view-btn.active {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #0f172a;
+}
+
+.world {
+  margin-top: 1.25rem;
+  text-align: left;
+}
+
+.world-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+#world-location {
+  font-weight: 600;
+}
+
+#world-balance {
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.map-wrap {
+  position: relative;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1e293b;
+}
+
+#world-map-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-marker {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #facc15;
+  border: 3px solid #0f172a;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.6);
+  animation: marker-pulse 1.6s infinite;
+  z-index: 2;
+}
+
+.map-marker[hidden] {
+  display: none;
+}
+
+@keyframes marker-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.6); }
+  70% { box-shadow: 0 0 0 12px rgba(250, 204, 21, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+}
+
+/* Fase 2 — Panel de viaje */
+
+#world-panel {
+  margin-top: 1rem;
+}
+
+.panel-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.trip-progress {
+  color: #facc15;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.trip-cancel {
+  width: 100%;
+}
+
+.dest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dest-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dest-meta {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.dest-enter {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.dest-explore {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.dest-explore:disabled {
+  background: #334155;
+  color: #64748b;
+}
+
+/* M4: aviso cuando no alcanza el saldo para Explorar. */
+.dest-not-enough {
+  margin-top: 0.4rem;
+  color: #f87171;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.explored-tag {
+  margin-top: 0.5rem;
+  color: #4ade80;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* M5: historia de la ciudad explorada (bajo "Explorada"). */
+.city-story {
+  margin-top: 0.4rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Fase 2 — Modal de dragones + moneda al aire */
+
+.dragon-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.dragon-overlay[hidden] {
+  display: none;
+}
+
+.dragon-modal {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 1.5rem 1.25rem;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.dragon-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.coin {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 1rem;
+  perspective: 600px;
+}
+
+.coin-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.coin-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  border-radius: 50%;
+  backface-visibility: hidden;
+  border: 4px solid #facc15;
+  background: radial-gradient(circle at 30% 30%, #fde68a, #f59e0b);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.coin-tails {
+  transform: rotateY(180deg);
+  background: radial-gradient(circle at 30% 30%, #bbf7d0, #4ade80);
+  border-color: #4ade80;
+}
+
+.coin.flipping .coin-inner {
+  animation: coin-flip 1.4s ease-in-out forwards;
+}
+
+.coin.flipping.show-dragon .coin-inner {
+  animation: coin-flip-dragon 1.4s ease-in-out forwards;
+}
+
+/* Moneda quieta en el lado que tocó (estado final sin animación) */
+.coin.landed.show-clear .coin-inner {
+  transform: rotateY(180deg);
+}
+
+@keyframes coin-flip {
+  0% { transform: rotateY(0deg) translateY(0); }
+  50% { transform: rotateY(900deg) translateY(-30px); }
+  100% { transform: rotateY(1800deg) translateY(0); }
+}
+
+@keyframes coin-flip-dragon {
+  0% { transform: rotateY(0deg) translateY(0); }
+  50% { transform: rotateY(900deg) translateY(-30px); }
+  100% { transform: rotateY(1980deg) translateY(0); }
+}
+
+.dragon-result {
+  min-height: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.dragon-result.is-dragon {
+  color: #f87171;
+}
+
+.dragon-result.is-clear {
+  color: #4ade80;
+}

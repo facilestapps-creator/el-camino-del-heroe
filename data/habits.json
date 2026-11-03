@@ -1,0 +1,64 @@
+{
+  "stepsPerPoint": 700,
+  "habits": [
+    {
+      "id": "pasos",
+      "label": "Pasos",
+      "style": "number"
+    },
+    {
+      "id": "ejercicio",
+      "label": "Ejercicio",
+      "style": "direct",
+      "minDesc": "10 minutos",
+      "fullDesc": "Rutina completa",
+      "minPoints": 1,
+      "fullPoints": 3
+    },
+    {
+      "id": "desayuno",
+      "label": "Desayuno",
+      "style": "direct",
+      "minDesc": "Rapido",
+      "fullDesc": "Completo",
+      "minPoints": 1,
+      "fullPoints": 3
+    },
+    {
+      "id": "almuerzo",
+      "label": "Almuerzo",
+      "style": "direct",
+      "minDesc": "Rapido",
+      "fullDesc": "Completo",
+      "minPoints": 1,
+      "fullPoints": 3
+    },
+    {
+      "id": "cena",
+      "label": "Cena",
+      "style": "direct",
+      "minDesc": "Rapido",
+      "fullDesc": "Completo",
+      "minPoints": 1,
+      "fullPoints": 3
+    },
+    {
+      "id": "lectura",
+      "label": "Lectura",
+      "style": "direct",
+      "minDesc": "10 minutos",
+      "fullDesc": "30 minutos o mas",
+      "minPoints": 1,
+      "fullPoints": 3
+    },
+    {
+      "id": "agua",
+      "label": "Agua",
+      "style": "direct",
+      "minDesc": "Media meta",
+      "fullDesc": "Meta cumplida",
+      "minPoints": 1,
+      "fullPoints": 3
+    }
+  ]
+}

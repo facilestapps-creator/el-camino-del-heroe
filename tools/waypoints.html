@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waypoints — El camino del héroe</title>
+<style>
+  :root { --bg:#141b26; --panel:#1e2836; --line:#33415a; --text:#dbe4f0; --dim:#8fa1bb; --red:#e8433f; --gold:#f5c542; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui, sans-serif; overflow:hidden; }
+  header { position:relative; z-index:5; background:var(--panel); border-bottom:1px solid var(--line);
+           padding:8px 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  header h1 { font-size:15px; margin:0 8px 0 0; }
+  button, select, input[type=text] { background:#2a3648; color:var(--text); border:1px solid var(--line);
+           border-radius:6px; padding:6px 10px; font-size:13px; cursor:pointer; }
+  button:hover { background:#35435a; }
+  button.primary { background:var(--red); border-color:var(--red); color:#fff; font-weight:600; }
+  button.primary:hover { background:#f25c58; }
+  button.icon { padding:6px 12px; font-weight:700; }
+  label.chk { display:flex; align-items:center; gap:5px; color:var(--dim); font-size:13px; cursor:pointer; }
+  #status { color:var(--gold); font-variant-numeric:tabular-nums; min-width:250px; }
+  main { display:flex; gap:12px; padding:10px; height:calc(100vh - 54px); }
+  #mapwrap { position:relative; flex:1 1 auto; min-width:0; border:1px solid var(--line); border-radius:6px;
+             overflow:hidden; background:#0d1117; }
+  canvas { display:block; cursor:grab; touch-action:none; }
+  canvas:active { cursor:grabbing; }
+  aside { flex:0 0 300px; background:var(--panel); border:1px solid var(--line);
+          border-radius:8px; padding:10px 12px; overflow:auto; }
+  aside h2 { font-size:13px; color:var(--dim); margin:10px 0 6px; text-transform:uppercase; letter-spacing:.05em; }
+  #pts { max-height:34vh; overflow:auto; font-variant-numeric:tabular-nums; font-size:13px; }
+  #pts div { display:flex; justify-content:space-between; gap:8px; padding:2px 4px; border-radius:4px; }
+  #pts div:nth-child(odd) { background:#232f40; }
+  #pts b { color:var(--gold); font-weight:600; }
+  #pts .del { color:var(--red); cursor:pointer; padding:0 4px; }
+  #pts .del:hover { background:#3a2730; }
+  #json { width:100%; height:120px; background:#0d1117; color:#9fe8a0; border:1px solid var(--line);
+          border-radius:6px; font:12px/1.35 ui-monospace, monospace; padding:8px; resize:vertical; }
+  #hint { color:var(--dim); font-size:12.5px; margin-top:8px; }
+  #copymsg { color:#9fe8a0; font-size:12.5px; min-height:1.2em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧭 Waypoints</h1>
+  <input type="text" id="tramo" placeholder="tramo (ej. arv-stark)" size="14">
+  <button class="icon" id="zoomout" title="Alejar">−</button>
+  <button class="icon" id="zoomin" title="Acercar">+</button>
+  <button id="fit">🔍 Ajustar</button>
+  <label class="chk"><input type="checkbox" id="grid" checked> Grilla 5 px</label>
+  <label class="chk"><input type="checkbox" id="cities" checked> Ciudades</label>
+  <button id="undo" title="Ctrl+Z">↩ Deshacer</button>
+  <button id="clear">🗑 Limpiar</button>
+  <button id="load">⤓ Cargar pegado</button>
+  <button class="primary" id="copy">📋 Copiar JSON</button>
+  <span id="status">x: — y: —</span>
+</header>
+
+<main>
+  <div id="mapwrap"><canvas id="cv"></canvas></div>
+  <aside>
+    <h2>Puntos (<span id="count">0</span>)</h2>
+    <div id="pts"></div>
+    <div id="copymsg"></div>
+    <h2>JSON para world.json</h2>
+    <textarea id="json" readonly placeholder='{"waypoints": [ … ]}'></textarea>
+    <p id="hint">Rueda del mouse: zoom · Arrastrar: mover · Clic: agregar punto · Ctrl+Z: deshacer</p>
+  </aside>
+</main>
+
+<script>
+const MAP_W = 963, MAP_H = 1121;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const wrap = document.getElementById('mapwrap');
+let img = new Image();
+let pts = [];            // [{x,y}] en px del mapa
+let cities = [];
+let showGrid = true, showCities = true;
+let scale = 1, ox = 0, oy = 0;      // vista: pantalla = mapa*scale + (ox,oy)
+let dpr = window.devicePixelRatio || 1;
+let cursor = null;                   // coords del mapa bajo el puntero
+let drag = null;                     // {sx,sy,ox,oy,moved}
+
+img.src = '../assets/map/world-map-crop.webp';
+img.onload = () => fetch('../data/world.json').then(r => r.json()).then(w => {
+  cities = (w.cities || []).map(c => ({ name: c.name, x: c.x/100*MAP_W, y: c.y/100*MAP_H }));
+  fit(); draw();
+}).catch(() => { fit(); draw(); });
+
+// --- vista ---
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(wrap.clientWidth * dpr);
+  cv.height = Math.round(wrap.clientHeight * dpr);
+  cv.style.width = wrap.clientWidth + 'px';
+  cv.style.height = wrap.clientHeight + 'px';
+  draw();
+}
+window.addEventListener('resize', resize);
+
+function fit() {
+  const s = Math.min(wrap.clientWidth / MAP_W, wrap.clientHeight / MAP_H) * 0.98;
+  scale = s;
+  ox = (wrap.clientWidth - MAP_W*s)/2;
+  oy = (wrap.clientHeight - MAP_H*s)/2;
+  draw();
+}
+function zoomAt(mx, my, factor) {
+  const ns = Math.min(10, Math.max(0.12, scale * factor));
+  const mapX = (mx - ox)/scale, mapY = (my - oy)/scale;
+  scale = ns; ox = mx - mapX*ns; oy = my - mapY*ns;
+  draw();
+}
+
+// --- dibujo ---
+function draw() {
+  const W = cv.width/dpr, H = cv.height/dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
+  ctx.setTransform(dpr*scale,0,0,dpr*scale,dpr*ox,dpr*oy);
+
+  if (img.complete && img.naturalWidth) ctx.drawImage(img,0,0);
+  if (showGrid) drawGrid(W,H);
+  if (showCities) drawCities();
+
+  if (pts.length) {
+    ctx.lineJoin='round'; ctx.lineWidth = 3/scale; ctx.strokeStyle='rgba(232,67,63,.9)';
+    ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.stroke();
+    pts.forEach((p,i) => {
+      ctx.beginPath(); ctx.arc(p.x,p.y,5/scale,0,7);
+      ctx.fillStyle = i===pts.length-1 ? '#f5c542' : '#fff';
+      ctx.fill(); ctx.lineWidth=2/scale; ctx.strokeStyle='#e8433f'; ctx.stroke();
+    });
+  }
+  if (cursor) {
+    ctx.strokeStyle='rgba(245,197,66,.55)'; ctx.lineWidth=1/scale;
+    ctx.beginPath(); ctx.moveTo(cursor.x,0); ctx.lineTo(cursor.x,MAP_H);
+    ctx.moveTo(0,cursor.y); ctx.lineTo(MAP_W,cursor.y); ctx.stroke();
+  }
+  document.getElementById('status').dataset.zoom = Math.round(scale*100)+'%';
+}
+
+function drawGrid(W,H) {
+  const x0 = Math.max(0, -ox/scale), x1 = Math.min(MAP_W, (W-ox)/scale);
+  const y0 = Math.max(0, -oy/scale), y1 = Math.min(MAP_H, (H-oy)/scale);
+  ctx.font = (10/scale)+'px system-ui'; ctx.textBaseline = 'top';
+  for (let x=Math.ceil(x0/5)*5; x<=x1; x+=5) {
+    const strong = x % 25 === 0;
+    ctx.strokeStyle = strong ? 'rgba(255,0,255,.45)' : 'rgba(255,0,255,.15)';
+    ctx.lineWidth = (strong?1:.5)/scale;
+    ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,y1); ctx.stroke();
+    if (x % 50 === 0) {
+      ctx.fillStyle='#ff40ff'; ctx.strokeStyle='rgba(0,0,0,.8)'; ctx.lineWidth=2/scale;
+      ctx.strokeText(x, x+2/scale, y0); ctx.fillText(x, x+2/scale, y0);
+      ctx.strokeText(x, x+2/scale, y1-12/scale); ctx.fillText(x, x+2/scale, y1-12/scale);
+    }
+  }
+  for (let y=Math.ceil(y0/5)*5; y<=y1; y+=5) {
+    const strong = y % 25 === 0;
+    ctx.strokeStyle = strong ? 'rgba(0,150,255,.45)' : 'rgba(0,150,255,.15)';
+    ctx.lineWidth = (strong?1:.5)/scale;
+    ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+    if (y % 50 === 0) {
+      ctx.fillStyle='#40a0ff'; ctx.strokeStyle='rgba(0,0,0,.8)'; ctx.lineWidth=2/scale;
+      ctx.strokeText(y, x0+2/scale, y+2/scale); ctx.fillText(y, x0+2/scale, y+2/scale);
+      ctx.strokeText(y, x1-28/scale, y+2/scale); ctx.fillText(y, x1-28/scale, y+2/scale);
+    }
+  }
+}
+
+function drawCities() {
+  ctx.font = 'bold '+(12/scale)+'px system-ui'; ctx.textBaseline = 'middle';
+  cities.forEach(c => {
+    ctx.beginPath(); ctx.arc(c.x,c.y,6/scale,0,7);
+    ctx.fillStyle='#f5c542'; ctx.fill(); ctx.lineWidth=2/scale; ctx.strokeStyle='#000'; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.lineWidth=3/scale;
+    ctx.strokeText(c.name, c.x+10/scale, c.y); ctx.fillText(c.name, c.x+10/scale, c.y);
+  });
+}
+
+// --- interacción ---
+function toMap(clientX, clientY) {
+  const r = cv.getBoundingClientRect();
+  return { x: (clientX - r.left - ox)/scale, y: (clientY - r.top - oy)/scale };
+}
+
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = cv.getBoundingClientRect();
+  zoomAt(e.clientX-r.left, e.clientY-r.top, e.deltaY < 0 ? 1.18 : 1/1.18);
+}, { passive:false });
+
+cv.addEventListener('pointerdown', e => {
+  cv.setPointerCapture(e.pointerId);
+  drag = { sx:e.clientX, sy:e.clientY, ox, oy, moved:false };
+});
+cv.addEventListener('pointermove', e => {
+  const p = toMap(e.clientX, e.clientY);
+  cursor = { x: Math.max(0,Math.min(MAP_W,p.x)), y: Math.max(0,Math.min(MAP_H,p.y)) };
+  const zoom = document.getElementById('status').dataset.zoom || '';
+  document.getElementById('status').textContent =
+    `x: ${Math.round(cursor.x)}  y: ${Math.round(cursor.y)}  ` +
+    `(${(cursor.x/MAP_W*100).toFixed(1)}%, ${(cursor.y/MAP_H*100).toFixed(1)}%)  ${zoom}`;
+  if (drag) {
+    const dx = e.clientX-drag.sx, dy = e.clientY-drag.sy;
+    if (Math.hypot(dx,dy) > 4) drag.moved = true;
+    if (drag.moved) { ox = drag.ox+dx; oy = drag.oy+dy; }
+  }
+  draw();
+});
+cv.addEventListener('pointerup', e => {
+  if (drag && !drag.moved) {
+    const p = toMap(e.clientX, e.clientY);
+    const px = Math.round(p.x), py = Math.round(p.y);
+    if (px>=0 && py>=0 && px<=MAP_W && py<=MAP_H) { pts.push({x:px,y:py}); refresh(); }
+  }
+  drag = null;
+});
+cv.addEventListener('pointercancel', () => drag = null);
+
+function refresh() {
+  draw();
+  const list = document.getElementById('pts'); list.innerHTML = '';
+  pts.forEach((p,i) => {
+    const row = document.createElement('div');
+    const info = document.createElement('span');
+    info.innerHTML = `<b>${i+1}</b> (${p.x},${p.y}) = ${(p.x/MAP_W*100).toFixed(1)}%, ${(p.y/MAP_H*100).toFixed(1)}%`;
+    const del = document.createElement('span'); del.className='del'; del.textContent='✕';
+    del.onclick = () => { pts.splice(i,1); refresh(); };
+    row.append(info, del); list.append(row);
+  });
+  document.getElementById('count').textContent = pts.length;
+  const json = { waypoints: pts.map(p => ({ x:+(p.x/MAP_W*100).toFixed(1), y:+(p.y/MAP_H*100).toFixed(1) })) };
+  document.getElementById('json').value = JSON.stringify(json, null, 2);
+}
+
+document.getElementById('zoomin').onclick = () => zoomAt(cv.clientWidth/2, cv.clientHeight/2, 1.35);
+document.getElementById('zoomout').onclick = () => zoomAt(cv.clientWidth/2, cv.clientHeight/2, 1/1.35);
+document.getElementById('fit').onclick = fit;
+document.getElementById('undo').onclick = () => { pts.pop(); refresh(); };
+document.getElementById('clear').onclick = () => { pts = []; refresh(); };
+document.getElementById('grid').onchange = e => { showGrid = e.target.checked; draw(); };
+document.getElementById('cities').onchange = e => { showCities = e.target.checked; draw(); };
+
+document.getElementById('load').onclick = () => {
+  try {
+    const arr = JSON.parse(document.getElementById('json').value).waypoints || [];
+    pts = arr.map(w => ({ x: Math.round(w.x/100*MAP_W), y: Math.round(w.y/100*MAP_H) }));
+    refresh(); msg('Cargados ' + pts.length + ' puntos del JSON.');
+  } catch { msg('JSON inválido.', true); }
+};
+
+document.getElementById('copy').onclick = async () => {
+  const txt = document.getElementById('json').value;
+  try { await navigator.clipboard.writeText(txt); msg('¡JSON copiado! Pegalo en el chat.'); }
+  catch { document.getElementById('json').select(); msg('Ctrl+C para copiar.', true); }
+};
+
+function msg(t, err) {
+  const el = document.getElementById('copymsg');
+  el.textContent = t; el.style.color = err ? '#ff8080' : '#9fe8a0';
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z') { e.preventDefault(); pts.pop(); refresh(); }
+});
+
+resize();
+refresh();
+</script>
+</body>
+</html>
