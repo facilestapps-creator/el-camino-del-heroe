@@ -1,0 +1,12 @@
+# Respaldos de datos del usuario (NUNCA subir: contienen datos personales)
+*backup*.json
+*.zip
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Node
+node_modules/
+*.log
+*.tmp

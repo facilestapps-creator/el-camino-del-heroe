@@ -39,6 +39,17 @@ preguntar** antes de continuar.
 - Para probar: `python3 -m http.server 8000` desde `habit-quest/` → http://localhost:8000
   (los ES modules no funcionan abriendo el archivo con file://).
 
+## Git y publicación
+
+- **Commit al terminar cada prompt**, con mensaje `"P<n>: <resumen>"`.
+- **Cada push publica la app EN VIVO** (GitHub Pages). No pushear cambios de código si
+  `npm test` falla (cuando existan las pruebas) **ni si hay errores en la consola del
+  navegador**. Los cambios **solo de documentación** se pueden pushear.
+- **Antes de que existan pruebas**: pushear código solo si el usuario lo pide.
+- **Nunca** subir respaldos ni datos del usuario. **Nunca** `push --force` ni reescribir
+  historial.
+- Si algo se rompe en vivo: `git revert` del commit y push.
+
 ## Orden de fases
 
 Fase 0 ✓ · Fase 1 ✓ · Bloque A ✓ (datos y lógica) · Interacción de hábitos ✓
