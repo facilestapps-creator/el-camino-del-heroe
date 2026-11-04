@@ -1,5 +1,6 @@
 import { WORLD_KEY, WORLD_SCHEMA_VERSION } from './config.js';
-import { loadJSON, loadFromStorage, saveToStorage } from './storage.js';
+import { loadJSON } from './dataFiles.js';
+import { loadFromStorage, saveToStorage } from './storage.js';
 
 // Fase 2 — Modelo del mundo: estado del viajero, costos y caminos.
 

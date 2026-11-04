@@ -1,12 +1,6 @@
 import { DATA_KEY, SCHEMA_VERSION } from './config.js';
 
-export async function loadJSON(fileName) {
-  const response = await fetch(`data/${fileName}.json`, { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error(`No se pudo cargar data/${fileName}.json (HTTP ${response.status})`);
-  }
-  return response.json();
-}
+// Capa de persistencia: ÚNICO módulo que toca `localStorage`.
 
 export function loadDays() {
   const raw = localStorage.getItem(DATA_KEY);
@@ -44,4 +38,41 @@ export function loadFromStorage(key, fallbackValue) {
 
 export function saveToStorage(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
+}
+
+// Claves con el prefijo dado, parseadas (lo que no sea JSON válido queda como
+// string crudo — respaldos viejos guardaban valores ya serializados).
+export function collectByPrefix(prefix) {
+  const result = {};
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const key = localStorage.key(i);
+    if (key === null || !key.startsWith(prefix)) {
+      continue;
+    }
+    const raw = localStorage.getItem(key);
+    try {
+      result[key] = JSON.parse(raw);
+    } catch {
+      result[key] = raw;
+    }
+  }
+  return result;
+}
+
+// Reemplaza TODAS las claves del prefijo por las del archivo: string = valor
+// crudo ya serializado; el resto se serializa.
+export function replaceByPrefix(prefix, data) {
+  const current = [];
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const key = localStorage.key(i);
+    if (key !== null && key.startsWith(prefix)) {
+      current.push(key);
+    }
+  }
+  for (const key of current) {
+    localStorage.removeItem(key);
+  }
+  for (const [key, value] of Object.entries(data)) {
+    localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+  }
 }

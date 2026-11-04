@@ -1,27 +1,21 @@
-import { SCHEMA_VERSION, BACKUP_FILE_PREFIX, META_KEY, DATA_KEY, WORLD_KEY } from './config.js';
+import { SCHEMA_VERSION, BACKUP_FILE_PREFIX, META_KEY, STORAGE_PREFIX, DATA_KEY, WORLD_KEY } from './config.js';
 import { getTodayKey } from './habits.js';
+import { loadFromStorage, saveToStorage, collectByPrefix, replaceByPrefix } from './storage.js';
 
 // Bloque B — Respaldo: exportar (mini-bloque 2).
 // M6: meta:v1 ({ lastBackupAt }) se guarda ANTES de armar el archivo, así
-// queda incluido dentro del propio respaldo.
+// queda incluido dentro del propio respaldo. 5a: todo el acceso crudo a
+// localStorage vive en storage.js — acá solo se usa la capa.
 
 export function loadMeta() {
-  const raw = localStorage.getItem(META_KEY);
-  if (raw === null) {
-    return {};
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) ? parsed : {};
-  } catch {
-    return {};
-  }
+  const parsed = loadFromStorage(META_KEY, {});
+  return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) ? parsed : {};
 }
 
 function saveLastBackupAt() {
   const meta = loadMeta();
   meta.lastBackupAt = new Date().toISOString();
-  localStorage.setItem(META_KEY, JSON.stringify(meta));
+  saveToStorage(META_KEY, meta);
   return meta;
 }
 
@@ -41,20 +35,7 @@ export function daysSinceBackup(meta) {
 // Recoge TODAS las claves de localStorage que empiezan con "habitQuest:",
 // así el mundo y lo que se agregue en el futuro queda incluido sin tocar este código.
 export function collectBackupData() {
-  const data = {};
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const key = localStorage.key(i);
-    if (key === null || !key.startsWith('habitQuest:')) {
-      continue;
-    }
-    const raw = localStorage.getItem(key);
-    try {
-      data[key] = JSON.parse(raw);
-    } catch {
-      data[key] = raw;
-    }
-  }
-  return data;
+  return collectByPrefix(STORAGE_PREFIX);
 }
 
 export function createBackup() {
@@ -108,7 +89,7 @@ export function isValidBackup(backup) {
   if (typeof backup.data !== 'object' || backup.data === null || Array.isArray(backup.data)) {
     return false;
   }
-  if (!Object.keys(backup.data).some((key) => key.startsWith('habitQuest:'))) {
+  if (!Object.keys(backup.data).some((key) => key.startsWith(STORAGE_PREFIX))) {
     return false;
   }
   return isValidDataEntry(backup.data[DATA_KEY]) && isValidWorldEntry(backup.data[WORLD_KEY]);
@@ -180,17 +161,5 @@ function parseIfNeeded(value) {
 // Mini-bloque 4: aplicar el respaldo — borra TODAS las claves habitQuest:
 // actuales y escribe las del archivo. La recarga la dispara quien lo llama.
 export function applyBackup(backup) {
-  const currentKeys = [];
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const key = localStorage.key(i);
-    if (key !== null && key.startsWith('habitQuest:')) {
-      currentKeys.push(key);
-    }
-  }
-  for (const key of currentKeys) {
-    localStorage.removeItem(key);
-  }
-  for (const [key, value] of Object.entries(backup.data)) {
-    localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
-  }
+  replaceByPrefix(STORAGE_PREFIX, backup.data);
 }

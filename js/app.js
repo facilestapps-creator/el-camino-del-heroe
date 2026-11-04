@@ -1,4 +1,5 @@
-import { loadJSON, loadDays } from './storage.js';
+import { loadDays } from './storage.js';
+import { loadJSON } from './dataFiles.js';
 import { textOf, fillText } from './text.js';
 import {
   getHabitsData,

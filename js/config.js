@@ -8,3 +8,5 @@ export const BACKUP_STALE_DAYS = 7;
 
 export const SCHEMA_VERSION = 3;
 export const WORLD_SCHEMA_VERSION = 1;
+// 5a: prefijo de TODAS las claves del storage del juego, definido una sola vez.
+export const STORAGE_PREFIX = 'habitQuest:';

@@ -1,5 +1,6 @@
 import { SCHEMA_VERSION } from './config.js';
-import { loadJSON, saveDays } from './storage.js';
+import { loadJSON } from './dataFiles.js';
+import { saveDays } from './storage.js';
 
 // Logica de habitos y calculo de puntos (Fase 1 + Bloque A + M3 esquema v3).
 
