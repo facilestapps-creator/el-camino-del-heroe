@@ -6,6 +6,7 @@ import {
   getLevelValue,
   saveTodayLevel,
   saveSteps,
+  validateSteps,
   computeDayPoints,
   computeTotalSent,
   sendTodayPoints,
@@ -27,6 +28,8 @@ import {
   clearBackupError,
   showConfirm,
   hideConfirm,
+  showStepsError,
+  clearStepsError,
 } from './ui.js';
 import {
   exportBackup,
@@ -99,6 +102,7 @@ async function main() {
   const habitsData = await getHabitsData();
   const habits = habitsData.habits ?? [];
   const stepsPerPoint = typeof habitsData.stepsPerPoint === 'number' ? habitsData.stepsPerPoint : 700;
+  const maxSteps = typeof habitsData.maxSteps === 'number' ? habitsData.maxSteps : 30000;
 
   let daysData = migrateDaysData(loadDays(), habits);
   // M3: cambio de día — los pendientes de días anteriores se envían solos.
@@ -270,15 +274,34 @@ async function main() {
     renderAll();
   });
 
-  // M3: pasos manuales (ingreso manual del total del día).
+  // M3: pasos manuales (ingreso manual del total del día). M2: validación de
+  // mínimo (lo ya enviado) y tope (maxSteps). En rechazo: no se guarda, el
+  // campo vuelve al último valor guardado y se muestra el mensaje debajo (sin
+  // renderAll, que destruiría el span del mensaje).
   habitsList.addEventListener('change', (event) => {
     const input = event.target.closest('.habit-steps');
     if (!input) {
       return;
     }
     const habitId = input.dataset.stepsHabit;
-    daysData = saveSteps(daysData, habitId, Number(input.value), stepsPerPoint);
+    const validation = validateSteps(levelsByHabit[habitId], input.value, stepsPerPoint, maxSteps);
+    if (!validation.ok) {
+      const entry = levelsByHabit[habitId];
+      input.value = entry && typeof entry === 'object' && typeof entry.steps === 'number'
+        ? entry.steps
+        : 0;
+      const template = validation.reason === 'min'
+        ? textOf(textsBag, 'stepsMinMessage')
+        : textOf(textsBag, 'stepsMaxMessage');
+      const message = validation.reason === 'min'
+        ? fillText(template, { points: levelsByHabit[habitId]?.sentPoints ?? 0, min: validation.min })
+        : fillText(template, { max: validation.max });
+      showStepsError(habitId, message);
+      return;
+    }
+    daysData = saveSteps(daysData, habitId, input.value, stepsPerPoint, maxSteps);
     levelsByHabit = getTodayLevels(daysData);
+    clearStepsError(habitId);
     renderAll();
   });
 

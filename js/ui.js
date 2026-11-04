@@ -36,7 +36,10 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
     const entry = levelsByHabit?.[habit.id];
     const level = getLevelOf(entry);
     // M3: un hábito ya enviado (sentPoints > 0) queda bloqueado el día.
-    const locked = typeof entry === 'object' && entry !== null && (entry.sentPoints ?? 0) > 0;
+    // M1 (arreglo de pasos): el campo de pasos NUNCA se bloquea — la regla
+    // sigue para los hábitos por niveles.
+    const locked = habit.style !== 'number'
+      && typeof entry === 'object' && entry !== null && (entry.sentPoints ?? 0) > 0;
 
     const row = document.createElement('div');
     row.className = habit.style === 'direct' ? 'habit habit-direct' : 'habit';
@@ -158,6 +161,30 @@ function lockedTag(texts) {
   tag.className = 'habit-locked-tag';
   tag.textContent = textOf(texts, 'habitLocked');
   return tag;
+}
+
+// M2: aviso de validación debajo del campo de pasos. El mensaje ya viene
+// armado (textOf + fillText) de quien llama; solo se muestra/oculta acá.
+export function showStepsError(habitId, message) {
+  const row = document.querySelector(`.habit[data-habit-id="${habitId}"]`);
+  if (!row) {
+    return;
+  }
+  let element = row.querySelector('.habit-steps-error');
+  if (!element) {
+    element = document.createElement('span');
+    element.className = 'habit-steps-error';
+    row.appendChild(element);
+  }
+  element.textContent = message;
+}
+
+export function clearStepsError(habitId) {
+  const row = document.querySelector(`.habit[data-habit-id="${habitId}"]`);
+  const element = row?.querySelector('.habit-steps-error');
+  if (element) {
+    element.remove();
+  }
 }
 
 // Acepta formato viejo (numero) y formato nuevo ({ level, points }).

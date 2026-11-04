@@ -47,11 +47,12 @@ habit-quest/
 │   ├── habits.json
 │   ├── journey.json
 │   ├── stories.json
-│   └── world.json
+│   ├── world.json
+│   └── manifest.json       (app instalable: nombre, íconos, display)
 ├── tools/
 │   └── waypoints.html      (herramienta de trazado de rutas sobre el mapa)
 ├── assets/
-│   ├── icons/            (.gitkeep)
+│   ├── icons/              (app instalable: icon-192, icon-512, maskable, apple-touch)
 │   ├── characters/       (.gitkeep)
 │   └── map/
 │       ├── .gitkeep

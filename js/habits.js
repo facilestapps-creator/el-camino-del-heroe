@@ -50,17 +50,44 @@ export function saveTodayLevel(daysData, habitId, level, habit) {
   return next;
 }
 
+// Valida los pasos ingresados (M2): el mínimo es lo ya ENVIADO
+// (sentPoints × stepsPerPoint — lo enviado no se puede bajar) y el tope es
+// maxSteps. Campo vacío o no numérico = 0 y aplica la misma regla.
+// Devuelve { ok, reason, min, max } (reason: 'min' | 'max' cuando !ok).
+export function validateSteps(entry, steps, stepsPerPoint, maxSteps) {
+  const sent = entry && typeof entry === 'object' && typeof entry.sentPoints === 'number'
+    ? entry.sentPoints
+    : 0;
+  const min = sent * stepsPerPoint;
+  const numeric = Number(steps);
+  const safeSteps = Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
+  if (safeSteps < min) {
+    return { ok: false, reason: 'min', min, max: maxSteps };
+  }
+  if (safeSteps > maxSteps) {
+    return { ok: false, reason: 'max', min, max: maxSteps };
+  }
+  return { ok: true, reason: null, min, max: maxSteps };
+}
+
 // Guarda los pasos del dia (ingreso manual, total acumulado del dia).
-// points = floor(steps / stepsPerPoint), sin tope; nunca baja de lo ya
-// enviado (sentPoints). Devuelve el daysData nuevo.
-export function saveSteps(daysData, habitId, steps, stepsPerPoint) {
+// points = floor(steps / stepsPerPoint); nunca baja de lo ya enviado
+// (sentPoints). Si validateSteps rechaza el valor NO se guarda nada y se
+// devuelve daysData sin cambios (la logica se defiende sola, no solo la
+// pantalla). Devuelve el daysData nuevo cuando es valido.
+export function saveSteps(daysData, habitId, steps, stepsPerPoint, maxSteps) {
   const days = { ...(daysData?.days ?? {}) };
   const key = getTodayKey();
   const prev = days[key]?.[habitId];
+  const numeric = Number(steps);
+  const safeSteps = Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
+  const validation = validateSteps(prev, safeSteps, stepsPerPoint, maxSteps);
+  if (!validation.ok) {
+    return daysData;
+  }
   const sent = prev && typeof prev === 'object' && typeof prev.sentPoints === 'number'
     ? prev.sentPoints
     : 0;
-  const safeSteps = Number.isFinite(steps) ? Math.max(0, Math.floor(steps)) : 0;
   const points = Math.max(sent, Math.floor(safeSteps / stepsPerPoint));
   days[key] = { ...(days[key] ?? {}), [habitId]: { steps: safeSteps, points, sentPoints: sent } };
   const next = { ...daysData, schemaVersion: SCHEMA_VERSION, days };

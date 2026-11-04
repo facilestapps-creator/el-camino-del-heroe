@@ -140,13 +140,51 @@ consola sin errores en todos.
   **consola sin errores ni warnings**, localStorage funcionando en el dominio.
 - **Los datos del usuario NO se suben**: quedan en el localStorage de cada navegador.
 
+### App instalable ✓ (2026-11-03)
+
+- **`data/manifest.json`** (nombre/textos en `data/` por la regla de cero strings
+  hardcodeados): "El camino del héroe" / short "El camino", `display: standalone`,
+  `start_url`/`scope: "../"`, theme `#0f172a`.
+- **Íconos desde el mapa** (decisión del usuario): recorte cuadrado de la isla →
+  `assets/icons/`: `icon-192.png`, `icon-512.png`, `icon-512-maskable.png` (isla al 78 %
+  sobre fondo `#0f172a`), `apple-touch-icon.png` (180).
+- **Sin offline / sin service worker** (decisión del usuario: "solo instalable") — y ya
+  **no hace falta SW** para instalar: Chrome 108/112+ lo dejó de requerir (doc oficial).
+- `index.html`: links manifest + icon + apple-touch-icon + theme-color.
+- **Verificado**: local y en vivo — manifest200 y parsea, íconos200 `image/png`,
+  consola limpia. `beforeinstallprompt` no dispara acá porque el navegador del entorno
+  es **Electron** (limitación del entorno); prueba final = instalar en el Chrome real
+  del usuario (pedida en el reporte).
+
+### Ajuste 1 — Ingreso de pasos ✓ (2026-11-03 → 04)
+
+Tarea única de la auditoría del usuario: arreglar el ingreso de pasos.
+
+- **M1**: el campo de pasos **nunca se bloquea** (sin `disabled`, sin clase `locked`,
+  sin tag "Enviado") — `ui.js` acota el bloqueo a `style !== 'number'`; los hábitos
+  **por niveles** siguen bloqueándose tras Enviar.
+- **M2**: validación en la capa de lógica — `validateSteps(entry, steps, stepsPerPoint,
+  maxSteps)` en `habits.js` (mínimo = `sentPoints × stepsPerPoint`, tope =
+  `maxSteps: 30000` en `habits.json`, vacío/no numérico = 0). `saveSteps` llama a
+  `validateSteps` y **rechaza** (devuelve `daysData` sin cambios, sin tocar
+  localStorage). En pantalla: revert al último valor guardado + mensaje debajo
+  (`stepsMinMessage`/`stepsMaxMessage` desde `texts.json` con `fillText`); el mensaje
+  desaparece en el siguiente cambio válido.
+- **M3 (probado en navegador)**: a) 3000 → Enviar → 5000 = 3 pendientes → Enviar =
+  total 7 ✓ · b) 1000 tras enviado = rechazado con mensaje y revert ✓ · c) 30001
+  rechazado / 30000 aceptado ✓ · d) persiste tras recargar ✓ · e) niveles siguen
+  bloqueados tras Enviar ✓. Tests de lógica en Node: 22/22 OK. Consola limpia.
+- **M4**: regla de pasos en `DECISIONES.md` (⭐ Puntos); tope "si sale a producción"
+  quitado de Pendientes (ya implementado).
+
 ## Pendientes (en este orden)
 
-1. ~~Barrido final~~ ✓ · ~~**Publicar online**~~ **✓ (2026-11-03)** → siguiente:
-2. **App instalable** (mini-bloque siguiente, esperando OK/plan)
-3. **Historial**
-4. **Hitos** (`journey.json`, diferido hasta que el viaje funcione)
-5. **Perseguidor** (último)
+1. ~~Barrido final~~ ✓ · ~~**Publicar online**~~ ✓ (2026-11-03) ·
+   ~~**App instalable**~~ ✓ (2026-11-03, prueba de instalación en Chrome del usuario
+   pedida) → siguiente:
+2. **Historial**
+3. **Hitos** (`journey.json`, diferido hasta que el viaje funcione)
+4. **Perseguidor** (último)
 
 ## Sin planificar
 

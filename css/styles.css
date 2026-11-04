@@ -45,6 +45,7 @@ body {
 
 .habit {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -207,6 +208,13 @@ body {
 
 .habit-steps:disabled {
   color: #64748b;
+}
+
+/* M2: aviso de validación bajo el campo de pasos. */
+.habit-steps-error {
+  width: 100%;
+  font-size: 0.8rem;
+  color: #f87171;
 }
 
 #points-balance {

@@ -80,6 +80,16 @@ Los costos de abajo son **base**; en uso se multiplican por `travelCostMultiplie
     público, esta mecánica habría que re-worklear (la web no lee el podómetro).
   - **Implementado (auditoría M3)**: campo numérico enteros ≥ 0 con el **TOTAL** del día,
     `points = floor(pasos / 700)`, acumulativo; ver "🔍 Auditoría M1–M7".
+  - **Regla de pasos (Ajuste 1, 2026-11-03 → 04)**: la carga es **acumulativa y siempre
+    editable** (el campo NUNCA se bloquea ni se marca como enviado). Validación en la
+    capa de lógica (`validateSteps` en `habits.js`, que también usa `saveSteps`):
+    - **Mínimo = lo ya enviado** (`sentPoints × stepsPerPoint`) — lo enviado no se puede
+      bajar. Campo vacío o no numérico = 0 y aplica la misma regla.
+    - **Tope = `maxSteps: 30000`** (en `habits.json`, junto a `stepsPerPoint`).
+    - Ante un valor rechazado: no se guarda, el campo vuelve al último valor guardado y
+      se muestra un mensaje debajo (`stepsMinMessage` / `stepsMaxMessage` en
+      `texts.json`, armados con `fillText`); el mensaje desaparece en el siguiente
+      cambio válido. Los hábitos **por niveles** siguen bloqueándose tras Enviar.
 - **Sin techo diario** de puntos (decidido ✓).
 - **Saldo disponible** = Σ puntos ganados en **todos los días** − puntos gastados.
   Los gastados viven en `habitQuest:world:v1` campo **`spent`** (default 0).
@@ -303,6 +313,21 @@ M1–M7 (specs completas en `docs/MEMORIA.md`, sección "Auditoría"):
   estático; los ES modules funcionan porque el servidor envía `.js` con MIME correcto
   (verificado en vivo: 200 + MIME OK en todos los assets).
 
+## 📲 App instalable (2026-11-03 — decidido con el usuario)
+
+- **Ícono: recorte del mapa** (el usuario eligió entre pasar una imagen / mapa / uno
+  generado): cuadrado 963×963 centrado en la isla de `world-map-crop.webp` →
+  `assets/icons/` (192, 512, **maskable** al 78 % sobre `#0f172a`, apple-touch 180).
+- **Sin offline** (el usuario eligió "solo instalable"): **no hay service worker**. La
+  instalación no lo pide desde Chrome 108 (Android) / 112 (desktop) — verificado en la
+  doc de Chrome; el navegador del agente (Electron) ni dispara `beforeinstallprompt`
+  (limitación del entorno, no un fallo).
+- **`data/manifest.json`** vive en `data/` para respetar "todo texto viene de data/"
+  (name/short_name son texto): `start_url` y `scope` con `"../"` (se resuelven contra la
+  URL del manifest). Theme/background `#0f172a` (color de fondo del CSS).
+- En `index.html` solo links/ metas (manifest, icon, apple-touch-icon, theme-color) —
+  sin texto hardcodeado.
+
 ## ⏳ Pendientes / diferidos
 
 - **journey.json (15 hitos)** — diferido: el viaje ya funciona (Fase 2 ✓). Los hitos se
@@ -317,6 +342,4 @@ M1–M7 (specs completas en `docs/MEMORIA.md`, sección "Auditoría"):
   **estilo cíclico sin uso** (botón único
   Empezar/Minimo/Completo reemplazado por los botones directos el 2026-10-29 — conservado
   como fallback) y texto `habitStart` ("Empezar") en texts.json ya no se muestra.
-- **Si la app sale a producción**: validar un tope de 30.000 pasos por carga manual
-  (evita errores de tipeo que regalan puntos).
 - **Los nombres de las ciudades están dibujados en la imagen del mapa y son definitivos.**

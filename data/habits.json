@@ -1,5 +1,6 @@
 {
   "stepsPerPoint": 700,
+  "maxSteps": 30000,
   "habits": [
     {
       "id": "pasos",

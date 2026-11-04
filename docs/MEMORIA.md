@@ -3,7 +3,7 @@
 > Archivo de continuidad para cualquier chat/agente nuevo. Leer junto con `AGENTS.md`
 > (reglas permanentes), `docs/ROADMAP.md` (orden de fases), `docs/DECISIONES.md`
 > (decisiones de diseño + specs de los bloques A/B/C y Fase 2) y `README.md` (estructura).
-> Actualizar después de cada bloque/fase. Última actualización: 2026-11-01.
+> Actualizar después de cada bloque/fase. Última actualización: 2026-11-04.
 
 ## 🔎 Auditoría (2026-10-30 → 2026-10-31) — COMPLETA: M1–M7 ✓
 
@@ -501,8 +501,32 @@ repetirse en cualquier revisión de rutas.
   HTTP 200 con MIME correctos (js/json/css/webp), `world.json` remoto = 9 rutas, app
   navega con **consola limpia** (6 destinos, filas Bahía/Bosque), localStorage OK en el
   dominio, captura tomada. Docs sincronizados (README con URL + cómo publicar,
-  ROADMAP "Publicar online ✓", DECISIONES sección "🌐 Publicación"). Pendiente:
-  commit/push del sync de docs → **App instalable** (esperando OK/plan).
+  ROADMAP "Publicar online ✓", DECISIONES sección "🌐 Publicación"). Commit del sync
+  = `ac92283`.
+- **Mini-bloque "App instalable" COMPLETO (2026-11-03)**: decisión del usuario = ícono
+  **recorte del mapa** + "solo instalable" (**sin offline/service worker** — Chrome
+  108/112+ ya no lo requiere). `data/manifest.json` (name/short_name, `start_url`/
+  `scope: "../"`, standalone, theme `#0f172a`), íconos en `assets/icons/`
+  (icon-192/512/maskable 78 % + apple-touch 180), links en `index.html`. Commit
+  `ff1e03b` + push; verificado local y en vivo (manifest/íconos 200, parsea, consola
+  limpia). `beforeinstallprompt` no dispara porque el navegador del agente es
+  **Electron** (limitación del entorno) → prueba de instalación en el Chrome real del
+  usuario pedida en el reporte.
+- **Mini-bloque "Ajuste 1 — ingreso de pasos" COMPLETO (2026-11-03 → 04)**: auditoría
+  del usuario (los ajustes van uno a uno; al terminar: commit + push). Lo que pidió:
+  M1 campo de pasos **nunca bloqueado** (`ui.js` acota `locked` a `style !== 'number'`;
+  niveles siguen bloqueándose), M2 `validateSteps` + `maxSteps: 30000` y `saveSteps`
+  que **rechaza** inválidos (min = `sentPoints × stepsPerPoint`; vacío/no numérico = 0;
+  pantalla: revert + mensaje `stepsMinMessage`/`stepsMaxMessage` con `fillText`, sin
+  `renderAll()` en rechazo porque destruiría el span), M3 pruebas a–e **todas OK en
+  navegador** (3000→Enviar→5000=3 pend→7 total; 1000 rechazado vuelve a 5000; 30001
+  rech/30000 acep; persiste tras recargar; niveles bloqueados) + **22/22 tests de lógica
+  en Node** (`/tmp/opencode/esm-test/test-validate-steps.mjs`, espejo ESM con
+  localStorage mockeado), M4 docs (DECISIONES regla de pasos + quitado el tope "si sale
+  a producción" de Pendientes; ROADMAP "Ajuste 1 ✓"). Archivos: habits.json, texts.json,
+  habits.js, ui.js, app.js, styles.css. **Nota**: el storage del Electron se reinició
+  entre sesiones (se perdió el `data:v1` de prueba — limitación del entorno, no bug);
+  estado del navegador restaurado (solo `world:v1` original, sin `data:v1`/`meta:v1`).
 - **Servidor**: `python3 -m http.server 8000` desde `habit-quest/` (o
   `/tmp/opencode/serve_no_cache.py` en :8000 para pruebas sin caché). Verificar que esté
   vivo antes de probar (puede haber caído entre sesiones).
@@ -549,5 +573,7 @@ Resumen:
 
 - PIL 10.2.0 disponible (compresión/recorte de imágenes; el agente **sí puede ver imágenes**
   con la herramienta `read`).
-- git no está instalado en la máquina; no hay repositorio.
-- Fecha de referencia: 2026-11-01.
+- git SÍ está instalado (la nota "sin git" era de antes): repo `main` con remote
+  `git@github.com:facilestapps-creator/el-camino-del-heroe.git` (push SSH OK) y deploy
+  automático en GitHub Pages. Ver "🌐 Publicación" en DECISIONES.
+- Fecha de referencia: 2026-11-04.

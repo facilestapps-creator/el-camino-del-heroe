@@ -24,6 +24,8 @@
     "sendLabel": "Enviar",
     "pendingLabel": "pendientes",
     "habitLocked": "Enviado",
-    "stepsRule": "{stepsPerPoint} pasos = 1 punto"
+    "stepsRule": "{stepsPerPoint} pasos = 1 punto",
+    "stepsMinMessage": "Ya enviaste {points} puntos: el mínimo es {min} pasos.",
+    "stepsMaxMessage": "El máximo es {max} pasos por día."
   }
 }
