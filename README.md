@@ -14,6 +14,13 @@ python3 -m http.server 8000
 
 Luego abrir en el navegador: http://localhost:8000
 
+## Estado y documentación
+
+- **Estado actual, problemas conocidos y plan**: [`docs/overview.md`](docs/overview.md)
+  (se lee primero en cada sesión).
+- `tools/waypoints.html`: herramienta para trazar rutas sobre el mapa (clics con zoom/pan,
+  devuelve el JSON de waypoints para pegar en `world.json`).
+
 ## Publicación
 
 - **En vivo**: https://facilestapps-creator.github.io/el-camino-del-heroe/
@@ -50,19 +57,16 @@ habit-quest/
 │   ├── world.json
 │   └── manifest.json       (app instalable: nombre, íconos, display)
 ├── tools/
-│   └── waypoints.html      (herramienta de trazado de rutas sobre el mapa)
+│   └── waypoints.html      (trazador de rutas sobre el mapa → JSON de waypoints)
 ├── assets/
 │   ├── icons/              (app instalable: icon-192, icon-512, maskable, apple-touch)
 │   ├── characters/       (.gitkeep)
 │   └── map/
 │       ├── .gitkeep
-│       ├── Fantasy World Tutorial Map.jpg   (original del usuario)
-│       ├── Fantasy World Tutorial Map.png   (original del usuario)
-│       ├── Fantasy World Tutorial Map.webp  (original del usuario)
-│       ├── world-map.webp                   (optimizada 1600×1200, 79.6 KB)
 │       └── world-map-crop.webp              (recorte isla 963×1121, 110 KB)
 └── docs/
+    ├── overview.md         (estado, problemas conocidos y plan — memoria única)
     ├── ROADMAP.md
     ├── DECISIONES.md
-    └── MEMORIA.md
+    └── RECETAS.md          (procedimientos reutilizables)
 ```

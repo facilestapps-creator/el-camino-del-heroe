@@ -111,7 +111,7 @@ consola sin errores en todos.
   deshacer, "📋 Copiar JSON" → el usuario lo pega en el chat).
 - **Revisión de rutas (solo lectura)**: las 9 rutas siguen caminos pintados; 6 pares sin
   ruta directa (los resuelve multi-etapa) — **descartados definitivamente**.
-- **Receta "dos caminos"** guardada en `docs/MEMORIA.md` (sección reutilizable).
+- **Receta "dos caminos"** guardada en `docs/RECETAS.md` (sección reutilizable).
 
 ### Dos caminos + 5 rutas mejoradas ✓ (2026-11-03)
 
@@ -177,14 +177,10 @@ Tarea única de la auditoría del usuario: arreglar el ingreso de pasos.
 - **M4**: regla de pasos en `DECISIONES.md` (⭐ Puntos); tope "si sale a producción"
   quitado de Pendientes (ya implementado).
 
-## Pendientes (en este orden)
+## Pendientes
 
-1. ~~Barrido final~~ ✓ · ~~**Publicar online**~~ ✓ (2026-11-03) ·
-   ~~**App instalable**~~ ✓ (2026-11-03, prueba de instalación en Chrome del usuario
-   pedida) → siguiente:
-2. **Historial**
-3. **Hitos** (`journey.json`, diferido hasta que el viaje funcione)
-4. **Perseguidor** (último)
+El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6
+tildados a medida que se completan). Este archivo solo registra lo hecho.
 
 ## Sin planificar
 

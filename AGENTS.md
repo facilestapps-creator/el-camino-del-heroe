@@ -3,30 +3,36 @@
 App web personal de hábitos con mecánica de juego (estilo Habitica + mapa tipo
 Zombie Hikers, sin persecución). Leé esto antes de tocar cualquier cosa.
 
-## Regla de oro (2026-10-29)
+## Principio: un dato vive en un solo archivo
 
-El agente es **desarrollador y asesor**: las recomendaciones son bienvenidas, pero hay
-que **chequear con el usuario antes de empezar CUALQUIER cosa** — una línea de código,
-un cambio, un archivo, un bloque nuevo. **Nada se empieza sin visto bueno explícito.**
+- `README.md` = estructura y arranque.
+- `docs/overview.md` = estado, problemas conocidos y plan.
+- `docs/ROADMAP.md` = registro de lo hecho.
+- `docs/DECISIONES.md` = diseño y razones.
+- `docs/RECETAS.md` = procedimientos.
+- `AGENTS.md` (este archivo) = reglas del agente.
 
-**Protocolo de trabajo (2026-10-30)**: ante una indicación → ① leerla **entera** →
-② revisar si surgen dudas/obstáculos y **preguntar** → ③ ajustar el plan → ④ recién ahí
-accionar. Los bloques grandes se dividen en **mini-bloques**: al terminar cada uno,
-**resumen + esperar el OK** para el siguiente. Si surge una duda a mitad, **frenar y
-preguntar** antes de continuar.
+## Protocolo de trabajo
+
+- **Un prompt = una tarea.**
+- Mini-bloques **en orden, sin esperar OK** entre ellos.
+- **Frenar solo ante dudas reales** (si un requisito no está claro o falta información,
+  preguntar antes de seguir).
+- **Al terminar, reportar qué se hizo y qué se probó.**
+- **Al terminar cada prompt, actualizar `docs/overview.md`** (Estado, Problemas
+  conocidos, Plan, Historial) **y, si corresponde, `ROADMAP.md`, `DECISIONES.md` y
+  `README.md`.**
 
 ## Cómo continuar (obligatorio)
 
-1. Leer en este orden: `docs/MEMORIA.md` (estado completo y trabajo a medio hacer) →
-   `docs/ROADMAP.md` (qué fase/bloque sigue) → `docs/DECISIONES.md` (decisiones de
-   diseño y specs de los bloques A/B/C) → `README.md` (estructura real).
-2. Trabajar de a **UN bloque o fase por vez**: implementar → probar en el navegador →
-   reportar qué se probó → **DETENERSE** y esperar.
-3. Después de cada bloque/fase sincronizar la documentación: `README.md` (estructura),
-   `docs/ROADMAP.md` (estado), `docs/DECISIONES.md` (decisiones nuevas).
-   **Código y docs nunca desfasados.**
+1. Orden de lectura: `README.md` → `docs/overview.md` → `docs/ROADMAP.md` →
+   `docs/DECISIONES.md` (`docs/RECETAS.md` cuando se tracen caminos).
+2. Trabajar de a **una tarea por prompt**: implementar → probar en el navegador →
+   reportar qué se probó.
+3. Código y docs nunca desfasados.
 4. No agregar funciones que no se pidan.
-5. Nunca borrar ni pisar archivos de `assets/map/`.
+5. **No borrar archivos de `assets/` sin permiso del usuario** (va a agregar su propio
+   arte).
 
 ## Reglas técnicas
 
@@ -37,7 +43,10 @@ preguntar** antes de continuar.
   (`habitQuest:data:v1` y `habitQuest:world:v1`).
 - Mobile-first, pantalla única, 3 estados por hábito (nada/mínimo/completo), máximo 2 toques.
 - Para probar: `python3 -m http.server 8000` desde `habit-quest/` → http://localhost:8000
-  (los ES modules no funcionan abriendo el archivo con file://).
+  (los ES modules no funcionan abriendo el archivo con file://). Verificar que el
+  servidor esté vivo antes de probar (puede haber caído entre sesiones).
+- PIL disponible para imágenes (compresión/recorte); el agente **sí puede ver imágenes**
+  con la herramienta `read`.
 
 ## Git y publicación
 
@@ -49,12 +58,3 @@ preguntar** antes de continuar.
 - **Nunca** subir respaldos ni datos del usuario. **Nunca** `push --force` ni reescribir
   historial.
 - Si algo se rompe en vivo: `git revert` del commit y push.
-
-## Orden de fases
-
-Fase 0 ✓ · Fase 1 ✓ · Bloque A ✓ (datos y lógica) · Interacción de hábitos ✓
-(botones directos) · Bloque B ✓ (respaldo) · Bloque C ✓ (recorte de mapa) ·
-Fase 2 ✓ (mundo/viaje) · Historial · App instalable · Hitos (journey.json, diferido) ·
-Perseguidor (último).
-
-Estado real y detalle: `docs/ROADMAP.md`.

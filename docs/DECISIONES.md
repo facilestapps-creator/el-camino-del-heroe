@@ -189,7 +189,17 @@ Los costos de abajo son **base**; en uso se multiplican por `travelCostMultiplie
 ## 🔍 Auditoría M1–M7 (2026-10-30 → 2026-10-31)
 
 Revisión general del código + mejoras aprobadas por el usuario en la tanda
-M1–M7 (specs completas en `docs/MEMORIA.md`, sección "Auditoría"):
+M1–M7 (specs de cada mini-bloque en esta sección):
+
+### M1 — Limpieza
+
+- Imports sin uso borrados; `computeBalance` usa **`worldState.spent`** como fuente
+  única de verdad (`loadWorldSpent` eliminada de storage.js); `saveTodayLevel` **ya no
+  muta** `daysData` (devuelve el objeto nuevo y quien llama reasigna).
+- **`js/text.js` (nuevo)**: helper `textOf(bag, key)` → si falta la clave se muestra
+  **vacío + `console.warn`** con el nombre de la clave (nunca un string hardcodeado).
+- Textos fuera del código: `'Hoy'`, `'Puntos de hoy'` → texts.json; `'Aceptar'` (dragón)
+  → `world.texts.dragonAccept` en world.json.
 
 ### M2 — Dragones sin re-tiradas
 
@@ -216,6 +226,10 @@ M1–M7 (specs completas en `docs/MEMORIA.md`, sección "Auditoría"):
 
 ### M4 — Sin saldo + cartel de 2 opciones
 
+- **Modal genérico**: el cartel de confirmación del respaldo se generalizó a
+  **`showConfirm(message, buttons)`** / `hideConfirm()` (botones `[{label, className,
+  onClick}]`, textos desde data) — un solo `#confirm-overlay` en index.html para
+  respaldo, viajes, dragones, etc.
 - **"Entrar" es gratis** y habilita Explorar. Elegir destino abre cartel con
   **"Viajar a X"** / **"Viajar, entrar y explorar X"** (+ Cancelar). El plan full paga
   los 40 de explorar **dentro del costo del viaje** y `settleArrival` lo registra al llegar.
@@ -272,7 +286,7 @@ M1–M7 (specs completas en `docs/MEMORIA.md`, sección "Auditoría"):
   19.0). Cada ruta lleva campo **`"via"`** ("Bosque"/"Bahía") que se muestra con el
   texto existente `routeVia` ("por").
 - **Mini-bloque "dos caminos"** (aprobado, IMPLEMENTADO 2026-11-03, receta en
-  `docs/MEMORIA.md`): `destinationsFrom` → **una fila por ruta directa** (más barata
+  `docs/RECETAS.md`): `destinationsFrom` → **una fila por ruta directa** (más barata
   primero, campo `route`); `startTrip` guarda `trip.route`; `markerPosition` la respeta
   (fallback `shortestPath` para viajes viejos); `worldUI.js` muestra "Ciudad · por X";
   `app.js` pasa el **objeto destino completo** (un `.find` por cityId fallaría con dos
@@ -327,6 +341,43 @@ M1–M7 (specs completas en `docs/MEMORIA.md`, sección "Auditoría"):
   URL del manifest). Theme/background `#0f172a` (color de fondo del CSS).
 - En `index.html` solo links/ metas (manifest, icon, apple-touch-icon, theme-color) —
   sin texto hardcodeado.
+
+## 📋 Revisión 2026-11-03 (auditoría del usuario → plan P1–P6)
+
+- **Costo de ruta derivado del largo dibujado**: **13,6 px por punto**, sin valor
+  manual (reemplaza los costos fijos de la tabla del grafo; ver RECETAS — pendiente de
+  implementación, nota de revisión).
+- **Refactor antes de seguir con funciones nuevas** (P5: almacenamiento/capas, dividir
+  `app.js`, código muerto, textos con variables).
+- **Pruebas con `node --test`** (Node 18+) en `tests/` (P4).
+- **Tope de pasos: 30.000** (`maxSteps` en `habits.json`) — **implementado** en el
+  Ajuste 1 (2026-11-03 → 04, ver "⭐ Puntos").
+- **Hosting: GitHub Pages** — por eso la app **no se separa en `app/`** (Pages sirve
+  desde la raíz de la rama).
+- **`docs/overview.md` es la memoria única del proyecto** (estado, problemas, plan,
+  historial) — reemplazó a `docs/MEMORIA.md`.
+
+## 🙋 Dudas resueltas con el usuario (NO re-preguntar)
+
+- **"Entrar" es GRATIS** (no tiene costo — el usuario se corrigió solo). Habilita
+  **Explorar** (solo se explora una ciudad después de haber entrado en ella).
+- **Cartel al elegir destino = 2 opciones**: **"Viajar a X"** (solo costo de distancia) ·
+  **"Viajar, entrar y explorar X"** (distancia + 40 de explorar ya sumados; al llegar
+  queda entrada + explorada). Aprobado por el usuario ("¿te parece mejor?" → sí).
+- **Llegada (viaje al 100%)**: el marcador se mueve **proporcional del camino** durante
+  el viaje (si solo alcanza para un tramo intermedio, queda en ese punto) y al completarse
+  **queda en la ciudad destino** (pasás a estar ahí; libre de seguir viajando sin entrar).
+  "Entrar" solo registra la ciudad (visited) y habilita Explorar.
+- **Botón "Explorar"**: en el bloque de ciudad **bajo "Llegaste a X"** (junto a Entrar),
+  no abajo de la página. Mi interpretación: visible también tras recargar (si estás en
+  ciudad entrada y sin explorar); si el usuario lo quiere SOLO en el instante de la
+  llegada, avisará.
+- **Pasos**: los puntos **no pueden bajar de lo ya enviado** → points =
+  max(sentPoints, floor(pasos / 700)).
+- **M4 (sin saldo)**: cartel con variables (texto en world.json) por opción
+  (Viajar vs Viajar+entrar+explorar).
+- Dragones: persistir al **tirar** (no al aceptar), reusar guardado sin animación,
+  borrar dragonRolls al **Entrar** — todo confirmado "si" por el usuario.
 
 ## ⏳ Pendientes / diferidos
 
