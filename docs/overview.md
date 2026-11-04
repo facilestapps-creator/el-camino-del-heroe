@@ -54,4 +54,5 @@ Descartado por ahora: separar la app en `app/` (GitHub Pages desde rama publica 
 
 ## Historial
 - 2026-11-03: estado inicial verificado (commit ac92283d). Plan P1–P6 definido.
+- 2026-11-03: corte de auditoría aprobado por el usuario → OK para arrancar Publicar online (✓) y App instalable (✓).
 - 2026-11-04: P1 pasos ✓ (`95160bc`) · P2 `.gitignore` ✓ (`e151982`) · P3 documentación ✓: MEMORIA.md eliminado, secciones movidas (Dudas → DECISIONES, receta → RECETAS), AGENTS con protocolo nuevo, README/ROADMAP/DECISIONES sincronizados.
