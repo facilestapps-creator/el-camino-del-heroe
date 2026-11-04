@@ -1,0 +1,174 @@
+// M3 — Lógica del mundo con el world.json REAL (leído con fs).
+import { test, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resetLocalStorage } from './helpers/localStorage.js';
+import {
+  shortestPath,
+  pathCost,
+  flowBalanceToTrip,
+  cancelTrip,
+  rollDragon,
+  enterCity,
+  exploreCity,
+  settleArrival,
+  markerPosition,
+  startTrip,
+  exploreCost,
+} from '../js/world.js';
+
+const world = JSON.parse(
+  readFileSync(new URL('../data/world.json', import.meta.url), 'utf8'),
+);
+const cities = Object.fromEntries(world.cities.map((c) => [c.id, c]));
+const route = (id) => world.routes.find((r) => r.id === id);
+
+beforeEach(() => {
+  resetLocalStorage();
+});
+
+function freshState(currentCity = world.startCity) {
+  return {
+    schemaVersion: 1,
+    spent: 0,
+    currentCity,
+    visited: [world.startCity],
+    explored: [],
+    trip: null,
+    dragonRolls: {},
+  };
+}
+
+test('a) shortestPath: Western Glades → Starkrock usa la ruta de dragones', () => {
+  const result = shortestPath(world, 'western-glades', 'starkrock');
+  assert.deepEqual(result.path, ['western-glades', 'starkrock']);
+  assert.deepEqual(result.edges.map((e) => e.id), ['wg-stark-bay']);
+  assert.equal(result.baseCost, 53);
+});
+
+test('a2) shortestPath: Dar\'Hanok → Starkrock pasa por Arvandill', () => {
+  const result = shortestPath(world, 'darhanok', 'starkrock');
+  assert.deepEqual(result.path, ['darhanok', 'arvandill', 'starkrock']);
+  assert.equal(result.baseCost, 74); // 41 + 33
+});
+
+test('a3) shortestPath: Arvandill → Sandquill elige la ruta de menor costo', () => {
+  const result = shortestPath(world, 'arvandill', 'sandquill');
+  assert.deepEqual(result.path, ['arvandill', 'sandquill']);
+  assert.deepEqual(result.edges.map((e) => e.id), ['arv-sand-bay']); // 19 (Bahía) < 23 (Bosque)
+  assert.equal(result.baseCost, 19);
+});
+
+test('b) pathCost: multiplicador ×4 y el tramo de dragones se duplica', () => {
+  const dragonRoute = route('wg-stark-bay');
+  assert.equal(pathCost(world, [dragonRoute], false), 212); // 53 × 4
+  assert.equal(pathCost(world, [dragonRoute], true), 424); // con dragón
+});
+
+test('c) flowBalanceToTrip: flujo parcial y nunca supera el costo', () => {
+  const state = freshState();
+  startTrip(state, 'vornstead', 40, false, false, null);
+
+  const flow = flowBalanceToTrip(state, 25); // saldo 25, costo 40
+  assert.equal(flow, 25);
+  assert.equal(state.trip.progress, 25);
+  assert.equal(state.spent, 25);
+
+  const resto = flowBalanceToTrip(state, 1000); // nunca supera el costo
+  assert.equal(resto, 15);
+  assert.equal(state.trip.progress, 40);
+  assert.equal(state.spent, 40);
+
+  assert.equal(flowBalanceToTrip(state, 1000), 0); // ya llegó al tope
+  assert.equal(state.trip.progress, 40);
+});
+
+test('d) cancelTrip devuelve lo invertido', () => {
+  const state = freshState();
+  startTrip(state, 'vornstead', 40, false, false, null);
+  flowBalanceToTrip(state, 25);
+  assert.equal(state.spent, 25);
+
+  cancelTrip(state);
+  assert.equal(state.spent, 0); // spent vuelve a 0
+  assert.equal(state.trip, null);
+});
+
+test('e) rollDragon: la segunda tirada del mismo tramo usa el cache', () => {
+  const state = freshState();
+  const first = rollDragon(state, world, 'wg-stark-bay');
+  assert.equal(first.cached, false);
+
+  const second = rollDragon(state, world, 'wg-stark-bay');
+  assert.equal(second.isDragon, first.isDragon);
+  assert.equal(second.cached, true);
+});
+
+test('e2) enterCity borra dragonRolls', () => {
+  const state = freshState('western-glades');
+  state.visited = ['western-glades', 'arvandill'];
+  startTrip(state, 'starkrock', 100, true, false, null);
+  state.trip.progress = 100;
+  state.dragonRolls = { 'wg-stark-bay': true };
+
+  assert.equal(enterCity(state), true);
+  assert.deepEqual(state.dragonRolls, {});
+  assert.equal(state.trip, null);
+  assert.equal(state.currentCity, 'starkrock');
+  assert.ok(state.visited.includes('starkrock'));
+});
+
+test('f) exploreCity: falla sin saldo y sin ciudad visitada; funciona con saldo', () => {
+  const costo = exploreCost(world);
+  assert.equal(costo, 40); // 10 × 4
+
+  // sin ciudad visitada
+  const sinVisitar = freshState('starkrock');
+  assert.equal(exploreCity(world, sinVisitar, 100), false);
+  assert.equal(sinVisitar.spent, 0);
+  assert.deepEqual(sinVisitar.explored, []);
+
+  // sin saldo suficiente
+  const sinSaldo = freshState('arvandill');
+  assert.equal(exploreCity(world, sinSaldo, costo - 1), false);
+  assert.equal(sinSaldo.spent, 0);
+  assert.deepEqual(sinSaldo.explored, []);
+
+  // con saldo: funciona y descuenta el costo
+  const ok = freshState('arvandill');
+  assert.equal(exploreCity(world, ok, 100), true);
+  assert.equal(ok.spent, costo);
+  assert.deepEqual(ok.explored, ['arvandill']);
+});
+
+test('g) settleArrival con plan "viajar, entrar y explorar"', () => {
+  const state = freshState();
+  startTrip(state, 'sandquill', 100, false, true, null);
+  flowBalanceToTrip(state, 100); // viaje completo
+
+  assert.equal(settleArrival(state), true);
+  assert.equal(state.currentCity, 'sandquill');
+  assert.ok(state.visited.includes('sandquill'));
+  assert.ok(state.explored.includes('sandquill'));
+  assert.equal(state.trip, null);
+});
+
+test('h) markerPosition: 0% origen, 100% destino, 50% entre ambos', () => {
+  const origen = cities.arvandill;
+  const destino = cities.starkrock;
+  const state = freshState();
+  startTrip(state, 'starkrock', 132, false, false, route('arv-stark'));
+
+  state.trip.progress = 0;
+  assert.deepEqual(markerPosition(world, state), { x: origen.x, y: origen.y });
+
+  state.trip.progress = 132;
+  assert.deepEqual(markerPosition(world, state), { x: destino.x, y: destino.y });
+
+  state.trip.progress = 66; // 50%
+  const mitad = markerPosition(world, state);
+  const [xMin, xMax] = [Math.min(origen.x, destino.x), Math.max(origen.x, destino.x)];
+  const [yMin, yMax] = [Math.min(origen.y, destino.y), Math.max(origen.y, destino.y)];
+  assert.ok(mitad.x > xMin && mitad.x < xMax, `x=${mitad.x} no está entre ${xMin} y ${xMax}`);
+  assert.ok(mitad.y > yMin && mitad.y < yMax, `y=${mitad.y} no está entre ${yMin} y ${yMax}`);
+});

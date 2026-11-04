@@ -1,7 +1,7 @@
 # Decisiones de diseño — "El camino del héroe"
 
 Registro de las decisiones tomadas. Si algo cambia, se actualiza acá.
-Última actualización: 2026-11-01.
+Última actualización: 2026-11-04.
 
 ---
 
@@ -349,7 +349,11 @@ M1–M7 (specs de cada mini-bloque en esta sección):
   implementación, nota de revisión).
 - **Refactor antes de seguir con funciones nuevas** (P5: almacenamiento/capas, dividir
   `app.js`, código muerto, textos con variables).
-- **Pruebas con `node --test`** (Node 18+) en `tests/` (P4).
+- **Pruebas con `node --test`** (Node 18+) en `tests/` (P4) — **implementado
+  2026-11-04**: `npm test` (equivale a `node --test tests/`), 34 pruebas de lógica
+  (habits, world, backup, datos) con `node:test` + `node:assert/strict`, cero
+  dependencias y localStorage falso en `tests/helpers/localStorage.js`.
+  **Las pruebas se corren antes de cada push de código**: si fallan, no se pushea.
 - **Tope de pasos: 30.000** (`maxSteps` en `habits.json`) — **implementado** en el
   Ajuste 1 (2026-11-03 → 04, ver "⭐ Puntos").
 - **Hosting: GitHub Pages** — por eso la app **no se separa en `app/`** (Pages sirve

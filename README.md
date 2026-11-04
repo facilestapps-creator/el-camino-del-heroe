@@ -14,6 +14,18 @@ python3 -m http.server 8000
 
 Luego abrir en el navegador: http://localhost:8000
 
+## Correr las pruebas
+
+Requiere **Node 18 o superior**. Desde `habit-quest/`:
+
+```bash
+npm test
+```
+
+Equivalente sin npm: `node --test tests/` (es el comando exacto que ejecuta el
+script `test` de `package.json`). Cubren solo lógica (habits, world, backup y
+`data/`); no tocan DOM ni pantallas.
+
 ## Estado y documentación
 
 - **Estado actual, problemas conocidos y plan**: [`docs/overview.md`](docs/overview.md)
@@ -35,6 +47,7 @@ Luego abrir en el navegador: http://localhost:8000
 habit-quest/
 ├── AGENTS.md
 ├── index.html
+├── package.json            (ES modules + script "test" de Node)
 ├── README.md
 ├── css/
 │   └── styles.css
@@ -58,6 +71,14 @@ habit-quest/
 │   └── manifest.json       (app instalable: nombre, íconos, display)
 ├── tools/
 │   └── waypoints.html      (trazador de rutas sobre el mapa → JSON de waypoints)
+├── tests/                  (pruebas automáticas de la lógica — npm test)
+│   ├── helpers/
+│   │   └── localStorage.js (localStorage falso en memoria, se reinicia por prueba)
+│   ├── imports.test.js     (los módulos de lógica importan sin error en Node)
+│   ├── habits.test.js
+│   ├── world.test.js
+│   ├── backup.test.js
+│   └── data.test.js        (integridad de world/stories/habits.json)
 ├── assets/
 │   ├── icons/              (app instalable: icon-192, icon-512, maskable, apple-touch)
 │   ├── characters/       (.gitkeep)

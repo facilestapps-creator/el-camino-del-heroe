@@ -2,7 +2,7 @@
 
 > Se lee PRIMERO en cada sesión (después del README) y se actualiza al terminar cada prompt.
 > Máximo ~100 líneas: si crece, se resume. Sin datos personales del usuario (el repo es público).
-> Última actualización: 2026-11-04 · commits `95160bc` (P1), `e151982` (P2), P3 en curso.
+> Última actualización: 2026-11-04 · P1–P4 ✓ (commits y detalle en Historial).
 
 ## Qué es
 App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene nivel mínimo o completo; los puntos ganados se gastan para viajar y explorar un mapa de fantasía. Un solo usuario, sin cuentas ni servidor. Título provisorio: "El camino del héroe" (carpeta/paquete: habit-quest).
@@ -33,19 +33,18 @@ App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene
 - Un dato vive en un solo archivo: README (estructura y arranque) · overview (estado y plan) · ROADMAP (registro de lo hecho) · DECISIONES (diseño y razones) · RECETAS (procedimientos) · AGENTS (reglas del agente).
 - Al terminar cada prompt: actualizar overview (Estado, Problemas, Plan, Historial) y, si corresponde, ROADMAP, DECISIONES y README.
 
-## Estado (2026-11-04, tras P3)
-**Hecho:** Fase 0–2 (hábitos, enviar, mundo, viaje, dragones, explorar), respaldo, mapa recortado, trazador de caminos, 9 rutas, publicación en GitHub Pages, app instalable, P1 pasos (validación mín/tope), P2 `.gitignore` + reglas de git, P3 documentación (overview reemplaza a MEMORIA).
+## Estado (2026-11-04, tras P4)
+**Hecho:** Fase 0–2 (hábitos, enviar, mundo, viaje, dragones, explorar), respaldo, mapa recortado, trazador de caminos, 9 rutas, publicación en GitHub Pages, app instalable, P1 pasos (validación mín/tope), P2 `.gitignore` + reglas de git, P3 documentación (overview reemplaza a MEMORIA), P4 pruebas automáticas de la lógica (34 en `tests/`, cero dependencias).
 
 **Problemas conocidos:**
-1. Sin pruebas automáticas, y el agente publica con cada push.
-2. Código: `main()` de app.js de ~290 líneas, `renderAll` con efectos secundarios, acceso a localStorage disperso, rama de hábito "cíclico" muerta, textos con variables armados a mano en el código.
-3. Costos de ruta manuales: los píxeles por punto van de 11 a 17, así que el marcador avanza a velocidades distintas según la ruta.
+1. Código: `main()` de app.js de ~290 líneas, `renderAll` con efectos secundarios, acceso a localStorage disperso, rama de hábito "cíclico" muerta, textos con variables armados a mano en el código.
+2. Costos de ruta manuales: los píxeles por punto van de 11 a 17, así que el marcador avanza a velocidades distintas según la ruta.
 
 ## Plan de trabajo (en este orden)
 1. [x] P1 Pasos: campo siempre editable, mínimo = lo ya enviado, tope 30.000. ✓ (2026-11-04, `95160bc`)
 2. [x] P2 `.gitignore` y reglas de git. ✓ (2026-11-04, `e151982`)
 3. [x] P3 Documentación: este overview reemplaza a MEMORIA.md; AGENTS, README, ROADMAP y DECISIONES sincronizados. ✓ (2026-11-04)
-4. [ ] P4 Pruebas con `node --test` (Node 18+) en `tests/`.
+4. [x] P4 Pruebas con `node --test` (Node 18+) en `tests/`. ✓ (2026-11-04 — 34 pruebas, 0 fallas, correr antes de cada push de código)
 5. [ ] P5 Refactor en 4 partes: 5a almacenamiento y capas · 5b dividir app.js y separar actualizar de dibujar · 5c código muerto y redundancias · 5d textos con variables.
 6. [ ] P6 Costos de ruta derivados del largo del trazado (13,6 px por punto; el total se mantiene en 282), con el tamaño de imagen en `world.json`.
 7. [ ] Después: app instalable · historial · hitos (`journey.json`, diferido) · perseguidor (último). Sin planificar: tienda.
@@ -56,3 +55,4 @@ Descartado por ahora: separar la app en `app/` (GitHub Pages desde rama publica 
 - 2026-11-03: estado inicial verificado (commit ac92283d). Plan P1–P6 definido.
 - 2026-11-03: corte de auditoría aprobado por el usuario → OK para arrancar Publicar online (✓) y App instalable (✓).
 - 2026-11-04: P1 pasos ✓ (`95160bc`) · P2 `.gitignore` ✓ (`e151982`) · P3 documentación ✓: MEMORIA.md eliminado, secciones movidas (Dudas → DECISIONES, receta → RECETAS), AGENTS con protocolo nuevo, README/ROADMAP/DECISIONES sincronizados.
+- 2026-11-04: P4 pruebas automáticas ✓: `package.json` + `tests/` (habits, world, backup, datos + smoke de imports), `node:test`/`assert/strict` sin dependencias, localStorage falso en `tests/helpers/`. 34 pruebas, 34 en verde, 0 todo. Regla: correr antes de cada push de código.
