@@ -16,7 +16,7 @@ App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene
 
 ## Reglas de juego vigentes
 - Hábitos (7): ejercicio, desayuno, almuerzo, cena, lectura y agua (mínimo = 1 pt, completo = 3 pts) y pasos (ingreso manual del total del día, 700 pasos = 1 pt).
-- Enviar: lo marcado queda "pendiente"; al tocar Enviar pasa a la bolsa y el hábito se bloquea ese día. Disponible = puntos enviados − puntos gastados. Los pendientes de días anteriores se envían solos.
+- Enviar: lo marcado queda "pendiente"; al tocar Enviar pasa a la bolsa y los **niveles** del día quedan bloqueados (el campo de pasos sigue siempre editable). Disponible = puntos enviados − puntos gastados. Los pendientes de días anteriores se envían solos.
 - Mundo: 6 ciudades (Arvandill de inicio, Vornstead, Dar'Hanok, Sandquill, Starkrock, Western Glades) y 9 rutas (dos a Sandquill: Bosque y Bahía). Costos ×4 (`travelCostMultiplier`); explorar una ciudad cuesta 10 × 4.
 - Viajar: los puntos enviados fluyen al viaje a medida que llegan; cancelar devuelve lo invertido. Si no alcanzan, se pide confirmación para empezar igual. Explorar solo con el costo completo.
 - Dragones: el tramo Western Glades–Starkrock tiene 30 % de duplicar el costo. La moneda se guarda por tramo (no se puede re-tirar) y se borra al entrar a una ciudad.
@@ -47,7 +47,7 @@ App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene
 4. [x] P4 Pruebas con `node --test` (Node 18+) en `tests/`. ✓ (2026-11-04 — 34 pruebas, 0 fallas, correr antes de cada push de código)
 5. [ ] P5 Refactor en 4 partes: 5a almacenamiento y capas · 5b dividir app.js y separar actualizar de dibujar · 5c código muerto y redundancias · 5d textos con variables.
 6. [ ] P6 Costos de ruta derivados del largo del trazado (13,6 px por punto; el total se mantiene en 282), con el tamaño de imagen en `world.json`.
-7. [ ] Después: app instalable · historial · hitos (`journey.json`, diferido) · perseguidor (último). Sin planificar: tienda.
+7. [ ] Después: historial · hitos (`journey.json`, diferido) · perseguidor (último). Sin planificar: tienda.
 
 Descartado por ahora: separar la app en `app/` (GitHub Pages desde rama publica solo la raíz).
 
@@ -56,3 +56,4 @@ Descartado por ahora: separar la app en `app/` (GitHub Pages desde rama publica 
 - 2026-11-03: corte de auditoría aprobado por el usuario → OK para arrancar Publicar online (✓) y App instalable (✓).
 - 2026-11-04: P1 pasos ✓ (`95160bc`) · P2 `.gitignore` ✓ (`e151982`) · P3 documentación ✓: MEMORIA.md eliminado, secciones movidas (Dudas → DECISIONES, receta → RECETAS), AGENTS con protocolo nuevo, README/ROADMAP/DECISIONES sincronizados.
 - 2026-11-04: P4 pruebas automáticas ✓: `package.json` + `tests/` (habits, world, backup, datos + smoke de imports), `node:test`/`assert/strict` sin dependencias, localStorage falso en `tests/helpers/`. 34 pruebas, 34 en verde, 0 todo. Regla: correr antes de cada push de código.
+- 2026-11-04: corrección de docs de la auditoría: originales del mapa (no están en el repo; copias `.jpg` en `~/Descargas/`), UI de carga manual de pasos ya hecha, bloqueo de niveles ≠ campo de pasos en Reglas, "app instalable" quitado de pendientes, costo unificado en 13,6 px/pt (RECETAS; medido sobre las 9 rutas: 3.827 px / 282 pts = 13,57).

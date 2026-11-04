@@ -14,8 +14,10 @@ repetirse en cualquier revisión de rutas.
 1. **Trazar** ambos caminos con `tools/waypoints.html` (clics sobre el mapa con zoom/pan;
    el usuario pega el JSON en el chat). **Nunca medir capturas pegadas a ojo** — llegan
    deformadas; usar la herramienta.
-2. **Costos por largo**: `points ≈ largo_px × 0,079` (k promedio de las rutas existentes;
-   el largo en % lleva factor 0,859 en x por el aspecto 963×1121). Proponer costos al
+2. **Costos por largo**: convertir el trazado a px reales — el largo en % lleva factor
+   0,859 en x por el aspecto 963×1121 y 1% de alto = 11,21 px. Luego
+   `points ≈ largo_px ÷ 13,6` (**13,6 px por punto**: número canónico de P6, medido sobre
+   las 9 rutas actuales: 3.827 px / 282 pts = 13,57). Proponer costos al
    usuario con `question` — **más corto = más barato**; el camino actual **conserva su
    costo** para no romper balances existentes.
 3. **`world.json`**: dos entradas en `routes` entre el **mismo par** de ciudades, cada una

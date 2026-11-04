@@ -7,9 +7,11 @@ Registro de las decisiones tomadas. Si algo cambia, se actualiza acá.
 
 ## 🗺️ Mundo / Mapa
 
-- **Mapa originales**: `assets/map/Fantasy World Tutorial Map.{jpg,png,webp}` — 2048×1536 px.
-  **Intocados: nunca borrar ni pisar.**
-- **Imagen optimizada creada**: `assets/map/world-map.webp` (1600×1200, **79.6 KB**, con PIL).
+- **Mapa original**: `Fantasy World Tutorial Map` — 2048×1536 px. **No está en el repo**
+  (nunca se subió) ni en `assets/map/`; quedan copias `.jpg` en `~/Descargas/` de la
+  máquina del usuario (verificado 2026-11-04). **No borrar los originales.**
+- **Imagen intermedia** `world-map.webp` (1600×1200, **79.6 KB**, creada con PIL): ya no
+  está en el proyecto — solo quedó el recorte (a continuación).
 - **Recorte a la isla (Bloque C ✓)**: `assets/map/world-map-crop.webp` — **963×1121, ~110 KB**.
   Es la imagen que ahora referencia `world.json` (`"image"`).
 - **Ciudad inicial**: **Arvandill** (centro). Desde ahí el personaje se mueve libremente.
@@ -180,7 +182,8 @@ Los costos de abajo son **base**; en uso se multiplican por `travelCostMultiplie
 **Implementado (2026-10-30):**
 
 - Caja de recorte usada: **(102, 108) → (1065, 1229)** = **963×1121 px**; peso final
-  **112.530 bytes (~110 KB)**, calidad 80. Originales y `world-map.webp` intactos.
+  **112.530 bytes (~110 KB)**, calidad 80. Originales y `world-map.webp` intactos en ese
+  momento (hoy `assets/map/` solo tiene el recorte — ver «Mundo / Mapa»).
 - Coordenadas nuevas ya aplicadas en `world.json` (ver tabla en "🗺️ Mundo / Mapa");
   `"image"` → `assets/map/world-map-crop.webp`. Rutas, textos y costos sin cambios.
 - Verificación visual: 6 círculos rojos → **todos sobre su ciudad** (edificios + cartel).
@@ -391,7 +394,8 @@ M1–M7 (specs de cada mini-bloque en esta sección):
   en CSS, sin asset externo.
 - ~~Detalle de taps/UI de las 3 acciones~~ — **hecho** (Fase 2 M2–M5): vista "Hoy" ↔
   "El camino", panel de destino con costo, Viajar/Cancelar/llegada, Entrar y Explorar.
-- UI de carga manual de pasos (regla 700 = 1 pt) — aún no pedida.
+- ~~UI de carga manual de pasos (regla 700 = 1 pt)~~ — **hecha**: campo en "Hoy", siempre
+  editable y validado (mínimo = lo ya enviado, tope 30.000) desde P1.
 - **Limpieza de código para más adelante**: ~~imports sin uso en `app.js`~~ y
   ~~`saveTodayLevel` modifica `daysData` por referencia~~ — **resuelto en auditoría M1**;
   **estilo cíclico sin uso** (botón único
