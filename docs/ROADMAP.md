@@ -191,10 +191,14 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
   `welcome`); test de estilos (`direct`/`number`) nuevos.
 - **5d** (`b1b4bb6`): textos con variables — 14 plantillas `{var}` en `data/` +
   `fillText` en `ui.js`/`worldUI.js`; cero concatenaciones de textos en el código.
-- **Verificado**: 35/35 pruebas; todas las claves de texto usadas existen en `data/`;
-  16/16 strings idénticos a los del código viejo; `node --check` en los 14 módulos;
-  smoke en navegador 5a–5c ✓ (tap, pasos, enviar, viaje, cancelar, entrar, explorar,
-  dragón). **Pendiente**: smoke visual 5d + push único (conexión al navegador caída).
+- **Probado (smoke completo en navegador, 2026-11-05)**: 35/35 pruebas; todas las
+  claves de texto usadas existen en `data/`; 16/16 strings idénticos a los del código
+  viejo; `node --check` en los 14 módulos. En pantalla: tap, pasos, enviar, viaje,
+  cancelar con reembolso, entrar, explorar, dragón (ambos lados) — y **todos los
+  textos 5d** (Estás en / Viajando / Faltan / Llegaste / Entrar / Explorar · 40 /
+  dos caminos / 212 · ¡Dragones! / Enviar (N) / +N pendientes / Disponible /
+  700 pasos) con **consola sin errores ni warnings**. Datos del usuario restaurados
+  tras el smoke.
 
 ## Pendientes
 
