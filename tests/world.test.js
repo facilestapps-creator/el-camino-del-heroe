@@ -15,11 +15,14 @@ import {
   markerPosition,
   startTrip,
   exploreCost,
+  hydrateRouteCosts,
 } from '../js/world.js';
 
 const world = JSON.parse(
   readFileSync(new URL('../data/world.json', import.meta.url), 'utf8'),
 );
+// P6: los costos se derivan del largo al cargar (world.json no trae points).
+hydrateRouteCosts(world);
 const cities = Object.fromEntries(world.cities.map((c) => [c.id, c]));
 const route = (id) => world.routes.find((r) => r.id === id);
 
@@ -43,13 +46,13 @@ test('a) shortestPath: Western Glades → Starkrock usa la ruta de dragones', ()
   const result = shortestPath(world, 'western-glades', 'starkrock');
   assert.deepEqual(result.path, ['western-glades', 'starkrock']);
   assert.deepEqual(result.edges.map((e) => e.id), ['wg-stark-bay']);
-  assert.equal(result.baseCost, 53);
+  assert.equal(result.baseCost, 47); // P6: 636 px ÷ 13,6
 });
 
 test('a2) shortestPath: Dar\'Hanok → Starkrock pasa por Arvandill', () => {
   const result = shortestPath(world, 'darhanok', 'starkrock');
   assert.deepEqual(result.path, ['darhanok', 'arvandill', 'starkrock']);
-  assert.equal(result.baseCost, 74); // 41 + 33
+  assert.equal(result.baseCost, 76); // 40 + 36 (costos P6 derivados del largo)
 });
 
 test('a3) shortestPath: Arvandill → Sandquill elige la ruta de menor costo', () => {
@@ -61,8 +64,8 @@ test('a3) shortestPath: Arvandill → Sandquill elige la ruta de menor costo', (
 
 test('b) pathCost: multiplicador ×4 y el tramo de dragones se duplica', () => {
   const dragonRoute = route('wg-stark-bay');
-  assert.equal(pathCost(world, [dragonRoute], false), 212); // 53 × 4
-  assert.equal(pathCost(world, [dragonRoute], true), 424); // con dragón
+  assert.equal(pathCost(world, [dragonRoute], false), 188); // 47 × 4
+  assert.equal(pathCost(world, [dragonRoute], true), 376); // con dragón
 });
 
 test('c) flowBalanceToTrip: flujo parcial y nunca supera el costo', () => {
@@ -171,4 +174,21 @@ test('h) markerPosition: 0% origen, 100% destino, 50% entre ambos', () => {
   const [yMin, yMax] = [Math.min(origen.y, destino.y), Math.max(origen.y, destino.y)];
   assert.ok(mitad.x > xMin && mitad.x < xMax, `x=${mitad.x} no está entre ${xMin} y ${xMax}`);
   assert.ok(mitad.y > yMin && mitad.y < yMax, `y=${mitad.y} no está entre ${yMin} y ${yMax}`);
+});
+
+// P6 — Costos derivados del largo del trazado (sin points manual en world.json).
+test('P6) costos derivados: total 282, enteros y más corto = más barato', () => {
+  const total = world.routes.reduce((sum, r) => sum + r.points, 0);
+  assert.equal(total, 282); // el total se mantiene en 282 (3.827 px ÷ 13,6)
+
+  for (const r of world.routes) {
+    assert.ok(Number.isInteger(r.points) && r.points > 0, `ruta ${r.id}: points = ${r.points}`);
+  }
+
+  // Bahía (260 px) más barata que Bosque (401 px): mantiene la elección.
+  assert.ok(route('arv-sand-bay').points < route('arv-sand').points);
+
+  // La ruta más corta en px (arv-vorn, 233) es la más barata.
+  const cheapest = world.routes.reduce((min, r) => (r.points < min.points ? r : min));
+  assert.equal(cheapest.id, 'arv-vorn');
 });

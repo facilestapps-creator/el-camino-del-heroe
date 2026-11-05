@@ -297,8 +297,9 @@ M1–M7 (specs de cada mini-bloque en esta sección):
   `world.json` puede llevar **`waypoints: [{x,y}]`** (% sobre `world-map-crop.webp`,
   963×1121) en orden **from→to**. Sin waypoints = recta (**retrocompatible**).
 - **Interpolación por longitud** (`js/world.js`): el marcador avanza a lo largo del
-  trazado proporcional a la longitud real de cada tramo (`pointAlongRoute`,
-  `routeSegmentLength` con factor **0,859** en x por el aspecto de la imagen);
+  trazado proporcional a la longitud real de cada tramo en **píxeles**
+  (`pointAlongRoute` + `segmentLengthPx` con `imageSize` de world.json — en P6
+  reemplazó al factor 0,859 hardcodeado);
   `edgeWaypointsOrdered` solo invierte el orden si el viaje va en sentido contrario.
 - **Las 9 rutas** quedaron trazadas (3–16 px del camino pintado detectado); costos sin
   cambios. `arv-stark` (53 pts, 53 waypoints) probada a full: desvío máx 0,05 %,
@@ -371,8 +372,11 @@ M1–M7 (specs de cada mini-bloque en esta sección):
 ## 📋 Revisión 2026-11-03 (auditoría del usuario → plan P1–P6)
 
 - **Costo de ruta derivado del largo dibujado**: **13,6 px por punto**, sin valor
-  manual (reemplaza los costos fijos de la tabla del grafo; ver RECETAS — pendiente de
-  implementación, nota de revisión).
+  manual (reemplaza los costos fijos de la tabla del grafo; ver RECETAS).
+  **Implementado en P6 (2026-11-05)**: `hydrateRouteCosts` en `world.js` calcula
+  `points = round(largo_px ÷ 13,6)` al cargar (llamado desde `getWorld`);
+  `imageSize` (963×1121) y `pxPerPoint` (13,6) viven en `world.json`; el total
+  queda en **282** exacto y Bahía sigue más barata que Bosque.
 - **Refactor antes de seguir con funciones nuevas** (P5: almacenamiento/capas, dividir
   `app.js`, código muerto, textos con variables).
 - **Pruebas con `node --test`** (Node 18+) en `tests/` (P4) — **implementado

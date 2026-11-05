@@ -200,6 +200,22 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
   700 pasos) con **consola sin errores ni warnings**. Datos del usuario restaurados
   tras el smoke.
 
+### P6 — Costos de ruta derivados del largo ✓ (2026-11-05)
+
+- **`world.json`**: los 9 routes perdieron el `points` manual; nuevos campos
+  `imageSize` (963×1121) y `pxPerPoint` (13,6) junto al `image` existente.
+- **`world.js`**: `hydrateRouteCosts` (llamado desde `getWorld`) calcula
+  `points = round(largo_px ÷ 13,6)` por polilínea (ciudad origen → waypoints →
+  ciudad destino); `segmentLengthPx` unifica costos y marcador — **desaparece el
+  factor 0,859 hardcodeado**.
+- **Costos nuevos** (×4 en pantalla): Vornstead 68 · WGlades 140 · Dar'Hanok 160 ·
+  Bahía 76 (igual) · Bosque 116 · Starkrock 144 · dragón 188 (era 212).
+  **Σ base = 282** ✓ (3.827 px ÷ 13,6 con redondeo por ruta).
+- **Probado**: 37/37 pruebas (2 nuevas: total 282 + datos sin `points` manual);
+  smoke en navegador en `127.0.0.1` (la caché de localhost servía `world.json`
+  viejo): filas con costos nuevos, "Starkrock 188 · ¡Dragones!", diálogos,
+  **consola limpia**; el viaje a mitad de camino del usuario restaurado byte a byte.
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

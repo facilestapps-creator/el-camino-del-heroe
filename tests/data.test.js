@@ -108,3 +108,23 @@ test('todo hábito usa un estilo soportado (direct o number)', () => {
     );
   }
 });
+
+// P6 — La imagen y la regla de costos viven en world.json; las rutas NO traen
+// "points" manual: se deriva del largo del trazado al cargar (hydrateRouteCosts).
+test('P6: imagen y pxPerPoint en world.json, rutas sin points manual', () => {
+  assert.ok(
+    world.imageSize && typeof world.imageSize.width === 'number' && world.imageSize.width > 0,
+    'falta imageSize.width en world.json',
+  );
+  assert.ok(
+    world.imageSize && typeof world.imageSize.height === 'number' && world.imageSize.height > 0,
+    'falta imageSize.height en world.json',
+  );
+  assert.equal(world.pxPerPoint, 13.6); // número canónico de P6 (RECETAS)
+  for (const r of world.routes) {
+    assert.ok(
+      !Object.prototype.hasOwnProperty.call(r, 'points'),
+      `ruta ${r.id}: "points" manual (P6 lo deriva del largo)`,
+    );
+  }
+});

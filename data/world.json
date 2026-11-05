@@ -1,5 +1,7 @@
 {
   "image": "assets/map/world-map-crop.webp",
+  "imageSize": { "width": 963, "height": 1121 },
+  "pxPerPoint": 13.6,
   "startCity": "arvandill",
   "explorationCost": 10,
   "travelCostMultiplier": 4,
@@ -13,7 +15,7 @@
     { "id": "starkrock", "name": "Starkrock", "x": 67.2, "y": 83.0 }
   ],
   "routes": [
-    { "id": "arv-vorn", "from": "arvandill", "to": "vornstead", "points": 14, "waypoints": [
+    { "id": "arv-vorn", "from": "arvandill", "to": "vornstead", "waypoints": [
       { "x": 64.6, "y": 56.6 },
       { "x": 65.3, "y": 56.6 },
       { "x": 66.1, "y": 56.5 },
@@ -34,7 +36,7 @@
       { "x": 72.1, "y": 50.9 },
       { "x": 72.1, "y": 50.6 }
     ] },
-    { "id": "arv-sand", "from": "arvandill", "to": "sandquill", "points": 23, "via": "Bosque", "waypoints": [
+    { "id": "arv-sand", "from": "arvandill", "to": "sandquill", "via": "Bosque", "waypoints": [
       { "x": 58.1, "y": 60.4 },
       { "x": 60.4, "y": 63.9 },
       { "x": 62.5, "y": 65.3 },
@@ -49,7 +51,7 @@
       { "x": 76.2, "y": 70.4 },
       { "x": 77.7, "y": 68.8 }
     ] },
-    { "id": "arv-sand-bay", "from": "arvandill", "to": "sandquill", "points": 19, "via": "Bahía", "waypoints": [
+    { "id": "arv-sand-bay", "from": "arvandill", "to": "sandquill", "via": "Bahía", "waypoints": [
       { "x": 64.5, "y": 56.7 },
       { "x": 65.3, "y": 56.6 },
       { "x": 66.0, "y": 56.6 },
@@ -74,7 +76,7 @@
       { "x": 76.0, "y": 62.9 },
       { "x": 76.3, "y": 63.5 }
     ] },
-    { "id": "vorn-sand", "from": "vornstead", "to": "sandquill", "points": 25, "waypoints": [
+    { "id": "vorn-sand", "from": "vornstead", "to": "sandquill", "waypoints": [
       { "x": 72.1, "y": 51.2 },
       { "x": 72.1, "y": 51.9 },
       { "x": 72.0, "y": 52.6 },
@@ -101,7 +103,7 @@
       { "x": 76.2, "y": 63.2 },
       { "x": 76.6, "y": 64.1 }
     ] },
-    { "id": "arv-stark", "from": "arvandill", "to": "starkrock", "points": 33, "waypoints": [
+    { "id": "arv-stark", "from": "arvandill", "to": "starkrock", "waypoints": [
       { "x": 58.5, "y": 59.6 },
       { "x": 58.2, "y": 60.2 },
       { "x": 58.0, "y": 60.9 },
@@ -156,7 +158,7 @@
       { "x": 63.0, "y": 85.0 },
       { "x": 63.7, "y": 85.1 }
     ] },
-    { "id": "dh-vorn", "from": "darhanok", "to": "vornstead", "points": 33, "waypoints": [
+    { "id": "dh-vorn", "from": "darhanok", "to": "vornstead", "waypoints": [
       { "x": 49.7, "y": 33.0 },
       { "x": 50.7, "y": 33.2 },
       { "x": 51.3, "y": 33.5 },
@@ -208,7 +210,7 @@
       { "x": 75.5, "y": 45.4 },
       { "x": 74.7, "y": 45.6 }
     ] },
-    { "id": "arv-dh", "from": "arvandill", "to": "darhanok", "points": 41, "waypoints": [
+    { "id": "arv-dh", "from": "arvandill", "to": "darhanok", "waypoints": [
       { "x": 54.3, "y": 56.9 },
       { "x": 53.7, "y": 56.5 },
       { "x": 53.2, "y": 56.1 },
@@ -270,7 +272,7 @@
       { "x": 50.3, "y": 33.6 },
       { "x": 49.7, "y": 33.1 }
     ] },
-    { "id": "arv-wg", "from": "arvandill", "to": "western-glades", "points": 41, "waypoints": [
+    { "id": "arv-wg", "from": "arvandill", "to": "western-glades", "waypoints": [
       { "x": 54.4, "y": 56.9 },
       { "x": 53.7, "y": 56.5 },
       { "x": 53.2, "y": 56.2 },
@@ -322,7 +324,7 @@
       { "x": 23.6, "y": 63.2 },
       { "x": 22.7, "y": 63.5 }
     ] },
-    { "id": "wg-stark-bay", "from": "western-glades", "to": "starkrock", "points": 53, "dragonRisk": true, "waypoints": [
+    { "id": "wg-stark-bay", "from": "western-glades", "to": "starkrock", "dragonRisk": true, "waypoints": [
       { "x": 22.5, "y": 63.8 },
       { "x": 23.4, "y": 63.8 },
       { "x": 24.3, "y": 63.6 },

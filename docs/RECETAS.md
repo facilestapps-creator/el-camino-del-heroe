@@ -1,7 +1,8 @@
 # Recetas — procedimientos reutilizables
 
-> **Pendiente de revisión:** el costo de ruta pasará a derivarse del largo del trazado;
-> hasta entonces el costo es manual.
+> **P6 (2026-11-05): el costo de ruta ya se deriva del largo del trazado** —
+> `points = round(largo_px ÷ 13,6)` al cargar (sin `points` manual en `world.json`;
+> `imageSize` y `pxPerPoint` declarados ahí).
 
 ## Flujo "dos caminos entre dos ciudades" (2026-11-01) — receta reutilizable
 
@@ -14,15 +15,15 @@ repetirse en cualquier revisión de rutas.
 1. **Trazar** ambos caminos con `tools/waypoints.html` (clics sobre el mapa con zoom/pan;
    el usuario pega el JSON en el chat). **Nunca medir capturas pegadas a ojo** — llegan
    deformadas; usar la herramienta.
-2. **Costos por largo**: convertir el trazado a px reales — el largo en % lleva factor
-   0,859 en x por el aspecto 963×1121 y 1% de alto = 11,21 px. Luego
-   `points ≈ largo_px ÷ 13,6` (**13,6 px por punto**: número canónico de P6, medido sobre
-   las 9 rutas actuales: 3.827 px / 282 pts = 13,57). Proponer costos al
-   usuario con `question` — **más corto = más barato**; el camino actual **conserva su
-   costo** para no romper balances existentes.
+2. **Costos**: NO se calculan a mano — desde P6 la app los **deriva sola** al cargar
+   (`hydrateRouteCosts`: `points = round(largo_px ÷ 13,6)` con `imageSize` y
+   `pxPerPoint` de `world.json`). La única regla de la receta: **más corto = más
+   barato** (se cumple solo); verificar en pantalla que la nueva ruta aparezca con
+   su costo y no cambie el orden de las existentes.
 3. **`world.json`**: dos entradas en `routes` entre el **mismo par** de ciudades, cada una
-   con `id` propio, `points` y campo **`"via"`** ("Bosque"/"Bahía") usando el texto ya
-   existente `"routeVia": "por"`. Waypoints en orden **from→to**.
+   con `id` propio (sin `points`: se deriva, paso 2) y campo **`"via"`**
+   ("Bosque"/"Bahía") usando el texto ya existente `"routeVia": "por"`. Waypoints en
+   orden **from→to**.
 4. **`world.js`**:
    - `destinationsFrom`: **una fila por ruta directa** cuando hay varias entre dos
      ciudades (ordenadas de más barata a más cara); con una sola o ninguna directa →

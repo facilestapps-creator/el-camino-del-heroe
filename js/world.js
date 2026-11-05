@@ -5,7 +5,43 @@ import { loadFromStorage, saveToStorage } from './storage.js';
 // Fase 2 — Modelo del mundo: estado del viajero, costos y caminos.
 
 export async function getWorld() {
-  return loadJSON('world');
+  const world = await loadJSON('world');
+  return hydrateRouteCosts(world);
+}
+
+// P6 — Costos derivados del largo del trazado: los routes NO traen "points"
+// manual en world.json; al cargar se calcula points = round(largo_px / pxPerPoint).
+// Tanto el tamaño de imagen como pxPerPoint (13,6) están declarados en world.json.
+export function hydrateRouteCosts(world) {
+  const image = world.imageSize;
+  const pxPerPoint = world.pxPerPoint;
+  if (!image || typeof pxPerPoint !== 'number' || pxPerPoint <= 0) {
+    return world;
+  }
+  for (const route of world.routes) {
+    route.points = Math.round(routeLengthPx(world, route) / pxPerPoint);
+  }
+  return world;
+}
+
+// Largo de una ruta en píxeles reales: ciudad origen → waypoints → destino.
+function routeLengthPx(world, route) {
+  const from = world.cities.find((c) => c.id === route.from);
+  const to = world.cities.find((c) => c.id === route.to);
+  const line = [from, ...(route.waypoints ?? []), to];
+  let total = 0;
+  for (let i = 0; i < line.length - 1; i += 1) {
+    total += segmentLengthPx(line[i], line[i + 1], world.imageSize);
+  }
+  return total;
+}
+
+// Segmento en píxeles: las coordenadas son % de una imagen que NO es cuadrada,
+// así que x e y se convierten con su propio lado (imageSize en world.json).
+function segmentLengthPx(a, b, image) {
+  const dx = ((a.x - b.x) / 100) * image.width;
+  const dy = ((a.y - b.y) / 100) * image.height;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 export function loadWorldState(world) {
@@ -317,7 +353,7 @@ export function markerPosition(world, state) {
     const t = weight > 0 ? remaining / weight : 1;
     // El tramo se recorre por su polilínea (waypoints del dibujo, si tiene).
     const waypoints = edgeWaypointsOrdered(path.edges[i], path.path[i]);
-    return pointAlongRoute({ x, y }, waypoints, { x: next.x, y: next.y }, t);
+    return pointAlongRoute({ x, y }, waypoints, { x: next.x, y: next.y }, t, world.imageSize);
   }
   return { x: dest.x, y: dest.y };
 }
@@ -333,13 +369,14 @@ function edgeWaypointsOrdered(edge, fromId) {
 }
 
 // Punto a la fracción t (0..1) de la polilínea start → waypoints → end,
-// repartiendo por longitud de segmento. Sin waypoints = recta (como antes).
-function pointAlongRoute(start, waypoints, end, t) {
+// repartiendo por longitud de segmento (en píxeles, con imageSize).
+// Sin waypoints = recta (como antes).
+function pointAlongRoute(start, waypoints, end, t, image) {
   const line = [start, ...waypoints, end];
   const lengths = [];
   let total = 0;
   for (let i = 0; i < line.length - 1; i += 1) {
-    const segment = routeSegmentLength(line[i], line[i + 1]);
+    const segment = segmentLengthPx(line[i], line[i + 1], image);
     lengths.push(segment);
     total += segment;
   }
@@ -360,15 +397,6 @@ function pointAlongRoute(start, waypoints, end, t) {
     };
   }
   return { x: end.x, y: end.y };
-}
-
-// Longitud de un segmento en % de imagen. La imagen no es cuadrada
-// (963×1121): la x se pondera por el aspecto para que las longitudes
-// en % correspondan a píxeles reales y la velocidad sea pareja.
-function routeSegmentLength(a, b) {
-  const dx = (a.x - b.x) * 0.859;
-  const dy = a.y - b.y;
-  return Math.sqrt(dx * dx + dy * dy);
 }
 
 // Cancelar devuelve al saldo los puntos ya invertidos en el viaje.
