@@ -52,15 +52,19 @@ habit-quest/
 ├── css/
 │   └── styles.css
 ├── js/
-│   ├── app.js
+│   ├── app.js              (orquestador: session + refresh() = actualizar + dibujar)
 │   ├── backup.js
-│   ├── config.js
-│   ├── storage.js
+│   ├── backupFlow.js       (flujo de respaldo: exportar/importar + línea "último respaldo")
+│   ├── config.js           (claves, versiones y STORAGE_PREFIX)
+│   ├── dataFiles.js        (lectura de data/*.json — único módulo con fetch)
 │   ├── habits.js
+│   ├── habitsFlow.js       (flujo de hábitos: tap por nivel, pasos, Enviar)
 │   ├── journey.js
-│   ├── text.js
+│   ├── storage.js          (ÚNICO módulo que toca localStorage)
+│   ├── text.js             (textOf + fillText para plantillas {var})
 │   ├── ui.js
 │   ├── world.js
+│   ├── worldFlow.js        (flujo del mundo: destino, viaje, dragón, explorar)
 │   └── worldUI.js
 ├── data/
 │   ├── texts.json
@@ -74,7 +78,7 @@ habit-quest/
 ├── tests/                  (pruebas automáticas de la lógica — npm test)
 │   ├── helpers/
 │   │   └── localStorage.js (localStorage falso en memoria, se reinicia por prueba)
-│   ├── imports.test.js     (los módulos de lógica importan sin error en Node)
+│   ├── imports.test.js     (todos los módulos salvo app.js importan sin error en Node)
 │   ├── habits.test.js
 │   ├── world.test.js
 │   ├── backup.test.js

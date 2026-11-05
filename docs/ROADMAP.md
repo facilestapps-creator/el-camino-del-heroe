@@ -177,6 +177,25 @@ Tarea única de la auditoría del usuario: arreglar el ingreso de pasos.
 - **M4**: regla de pasos en `DECISIONES.md` (⭐ Puntos); tope "si sale a producción"
   quitado de Pendientes (ya implementado).
 
+### P5 — Refactor en 4 mini-bloques ✓ (2026-11-04)
+
+Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del código"):
+- **5a** (`f33d4ec`): capas de almacenamiento — `localStorage` solo en `storage.js`,
+  `fetch` solo en `dataFiles.js`, prefijo `habitQuest:` una sola vez en `config.js`,
+  respaldo delegando en storage.
+- **5b** (`52cd24b`): `app.js` = orquestador con `session { daysData, levelsByHabit,
+  worldState }` y `refresh() = updateState() + renderAll()` (actualizar separado de
+  dibujar); handlers en `habitsFlow.js` / `worldFlow.js` / `backupFlow.js`.
+- **5c** (`7e86aba`): código muerto eliminado — rama cíclica, `lockedTag`/`disabled`
+  inalcanzables, `getLevelOf` duplicado, textos huérfanos (`habitStart`, `tagline`,
+  `welcome`); test de estilos (`direct`/`number`) nuevos.
+- **5d** (`b1b4bb6`): textos con variables — 14 plantillas `{var}` en `data/` +
+  `fillText` en `ui.js`/`worldUI.js`; cero concatenaciones de textos en el código.
+- **Verificado**: 35/35 pruebas; todas las claves de texto usadas existen en `data/`;
+  16/16 strings idénticos a los del código viejo; `node --check` en los 14 módulos;
+  smoke en navegador 5a–5c ✓ (tap, pasos, enviar, viaje, cancelar, entrar, explorar,
+  dragón). **Pendiente**: smoke visual 5d + push único (conexión al navegador caída).
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

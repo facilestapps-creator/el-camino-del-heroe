@@ -119,12 +119,35 @@ Los costos de abajo son **base**; en uso se multiplican por `travelCostMultiplie
 
 - Hábitos y días: `habitQuest:data:v1`.
   - Guardado por hábito: `days["YYYY-MM-DD"][habitId] = { level, points }` con los puntos
-    calculados **al momento de guardar** con habits.json de ese momento (**SCHEMA_VERSION = 2**,
-    con migración desde el formato viejo numérico — Bloque A).
+    calculados **al momento de guardar** con habits.json de ese momento (**SCHEMA_VERSION = 3**,
+    con migración desde el formato viejo numérico — Bloque A; v2 = `{ level, points }` y
+    v3 agrega `sentPoints` con M3).
 - Mundo: `habitQuest:world:v1` — ampliado en la Fase 2 (M1): **`spent`** (default 0),
   **`currentCity`** (ubicación actual, arranca en `startCity`), **`visited`** (ciudades
   visitadas), **`explored`** (ciudades exploradas) y **`trip`** (viaje en curso:
   destino, costo, progreso y flag de dragón; `null` si no hay viaje).
+
+## 🧅 Capas del código (P5 — refactor 2026-11-04)
+
+Un dato vive en un solo archivo, y cada módulo tiene una responsabilidad:
+
+- **`dataFiles.js`** — lectura de `data/*.json` (fetch). Nada de localStorage.
+- **`storage.js`** — **ÚNICO módulo que toca `localStorage`**. El prefijo `habitQuest:`
+  vive una sola vez en `config.js` (`STORAGE_PREFIX`); el respaldo delega acá.
+- **`habits.js` / `world.js`** — lógica pura (sin DOM).
+- **`ui.js` / `worldUI.js`** — render: solo **dibujan** el estado, nunca lo mutan.
+- **`app.js`** — orquestador: carga datos, arma `session { daysData, levelsByHabit,
+  worldState }` y define `refresh() = updateState() + renderAll()`:
+  - `updateState()`: efectos y guardado (flujo del viaje, llegada).
+  - `renderAll()`: dibujo puro, **sin efectos secundarios**.
+- **`habitsFlow.js` / `worldFlow.js` / `backupFlow.js`** — handlers de interacción:
+  mutan `session.*` → guardan → `refresh()`.
+- **Regla**: todo cambio de estado pasa por `refresh()`; el render nunca muta.
+- **Textos con variables (5d)**: todo ensamblado es plantilla `{var}` en `data/` +
+  `fillText` (14 plantillas nuevas: `balanceText`, `sendText`, `pointsLabelLine`,
+  `pendingCountLine`, `pendingLabelLine`, `locationText`, `travelText`, `progressText`,
+  `arrivedText`, `enterText`, `exploreCostText`, `destViaText`, `destMetaText`,
+  `dragonSuffix`). Cero concatenaciones de textos en el código.
 
 ## ⚙️ Bloques de ajuste (decididos — antes de la Fase 2)
 

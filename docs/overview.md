@@ -2,7 +2,7 @@
 
 > Se lee PRIMERO en cada sesión (después del README) y se actualiza al terminar cada prompt.
 > Máximo ~100 líneas: si crece, se resume. Sin datos personales del usuario (el repo es público).
-> Última actualización: 2026-11-04 · P1–P4 ✓ (commits y detalle en Historial).
+> Última actualización: 2026-11-04 · P1–P5 ✓ (commits y detalle en Historial).
 
 ## Qué es
 App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene nivel mínimo o completo; los puntos ganados se gastan para viajar y explorar un mapa de fantasía. Un solo usuario, sin cuentas ni servidor. Título provisorio: "El camino del héroe" (carpeta/paquete: habit-quest).
@@ -24,7 +24,7 @@ App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene
 - Respaldo: exportar/importar JSON con validación; muestra "último respaldo".
 
 ## Estructura (raíz del repo)
-`index.html` · `css/` · `js/` (app, backup, config, habits, journey [vacío], storage, text, ui, world, worldUI) · `data/` (habits, journey, stories, texts, world) · `assets/` (mapa: `map/world-map-crop.webp`, 963×1121; los nombres de las ciudades están dibujados en la imagen y son definitivos) · `tools/waypoints.html` (trazador de caminos) · `docs/` · `AGENTS.md` · `README.md`
+`index.html` · `css/` · `js/` (app [orquestador: session + refresh], backup, backupFlow, config, dataFiles, habits, habitsFlow, journey [vacío], storage, text, ui, world, worldFlow, worldUI) · `data/` (habits, journey, stories, texts, world) · `assets/` (mapa: `map/world-map-crop.webp`, 963×1121; los nombres de las ciudades están dibujados en la imagen y son definitivos) · `tools/waypoints.html` (trazador de caminos) · `docs/` · `AGENTS.md` · `README.md`
 
 ## Reglas de trabajo
 - Un prompt = una tarea. Mini-bloques en orden, sin esperar OK; frenar solo ante dudas reales; probar y reportar.
@@ -33,19 +33,18 @@ App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene
 - Un dato vive en un solo archivo: README (estructura y arranque) · overview (estado y plan) · ROADMAP (registro de lo hecho) · DECISIONES (diseño y razones) · RECETAS (procedimientos) · AGENTS (reglas del agente).
 - Al terminar cada prompt: actualizar overview (Estado, Problemas, Plan, Historial) y, si corresponde, ROADMAP, DECISIONES y README.
 
-## Estado (2026-11-04, tras P4)
-**Hecho:** Fase 0–2 (hábitos, enviar, mundo, viaje, dragones, explorar), respaldo, mapa recortado, trazador de caminos, 9 rutas, publicación en GitHub Pages, app instalable, P1 pasos (validación mín/tope), P2 `.gitignore` + reglas de git, P3 documentación (overview reemplaza a MEMORIA), P4 pruebas automáticas de la lógica (34 en `tests/`, cero dependencias).
+## Estado (2026-11-04, tras P5)
+**Hecho:** Fase 0–2 (hábitos, enviar, mundo, viaje, dragones, explorar), respaldo, mapa recortado, trazador de caminos, 9 rutas, publicación en GitHub Pages, app instalable, P1 pasos (validación mín/tope), P2 `.gitignore` + reglas de git, P3 documentación (overview reemplaza a MEMORIA), P4 pruebas automáticas de la lógica (35 en `tests/`, cero dependencias), **P5 refactor** (capas: storage/dataFiles, app.js = orquestador con `refresh()` y flujos separados, código muerto eliminado, textos con variables en `data/` — ver DECISIONES «Capas del código»).
 
 **Problemas conocidos:**
-1. Código: `main()` de app.js de ~290 líneas, `renderAll` con efectos secundarios, acceso a localStorage disperso, rama de hábito "cíclico" muerta, textos con variables armados a mano en el código.
-2. Costos de ruta manuales: los píxeles por punto van de 11 a 17, así que el marcador avanza a velocidades distintas según la ruta.
+1. Costos de ruta manuales: los píxeles por punto van de 11 a 17, así que el marcador avanza a velocidades distintas según la ruta.
 
 ## Plan de trabajo (en este orden)
 1. [x] P1 Pasos: campo siempre editable, mínimo = lo ya enviado, tope 30.000. ✓ (2026-11-04, `95160bc`)
 2. [x] P2 `.gitignore` y reglas de git. ✓ (2026-11-04, `e151982`)
 3. [x] P3 Documentación: este overview reemplaza a MEMORIA.md; AGENTS, README, ROADMAP y DECISIONES sincronizados. ✓ (2026-11-04)
 4. [x] P4 Pruebas con `node --test` (Node 18+) en `tests/`. ✓ (2026-11-04 — 34 pruebas, 0 fallas, correr antes de cada push de código)
-5. [ ] P5 Refactor en 4 partes: 5a almacenamiento y capas · 5b dividir app.js y separar actualizar de dibujar · 5c código muerto y redundancias · 5d textos con variables.
+5. [x] P5 Refactor en 4 partes: 5a almacenamiento y capas · 5b dividir app.js y separar actualizar de dibujar · 5c código muerto y redundancias · 5d textos con variables. ✓ (2026-11-04 — `f33d4ec`, `52cd24b`, `7e86aba`, `b1b4bb6`; 35 pruebas verdes; push tras el smoke final en navegador)
 6. [ ] P6 Costos de ruta derivados del largo del trazado (13,6 px por punto; el total se mantiene en 282), con el tamaño de imagen en `world.json`.
 7. [ ] Después: historial · hitos (`journey.json`, diferido) · perseguidor (último). Sin planificar: tienda.
 
@@ -57,3 +56,4 @@ Descartado por ahora: separar la app en `app/` (GitHub Pages desde rama publica 
 - 2026-11-04: P1 pasos ✓ (`95160bc`) · P2 `.gitignore` ✓ (`e151982`) · P3 documentación ✓: MEMORIA.md eliminado, secciones movidas (Dudas → DECISIONES, receta → RECETAS), AGENTS con protocolo nuevo, README/ROADMAP/DECISIONES sincronizados.
 - 2026-11-04: P4 pruebas automáticas ✓: `package.json` + `tests/` (habits, world, backup, datos + smoke de imports), `node:test`/`assert/strict` sin dependencias, localStorage falso en `tests/helpers/`. 34 pruebas, 34 en verde, 0 todo. Regla: correr antes de cada push de código.
 - 2026-11-04: corrección de docs de la auditoría: originales del mapa (no están en el repo; copias `.jpg` en `~/Descargas/`), UI de carga manual de pasos ya hecha, bloqueo de niveles ≠ campo de pasos en Reglas, "app instalable" quitado de pendientes, costo unificado en 13,6 px/pt (RECETAS; medido sobre las 9 rutas: 3.827 px / 282 pts = 13,57).
+- 2026-11-04: **P5 refactor ✓ en 4 mini-bloques**: 5a (`f33d4ec`) localStorage solo en storage.js, fetch en dataFiles.js, prefijo en config · 5b (`52cd24b`) app.js = orquestador con `session` y `refresh() = updateState() + renderAll()`, flujos en habitsFlow/worldFlow/backupFlow · 5c (`7e86aba`) rama cíclica, lockedTag/disabled inalcanzables, getLevelOf duplicado y textos huérfanos eliminados (test de estilos nuevos) · 5d (`b1b4bb6`) 14 plantillas `{var}` en `data/` + `fillText` (verificado: claves completas y 16/16 strings idénticos). 35 pruebas en verde. Smoke en navegador: 5a–5c ✓ (tap, pasos, enviar, viaje, cancelar, entrar, explorar, dragón); 5d: smoke visual pendiente (se perdió la conexión del navegador) antes del push.
