@@ -48,6 +48,20 @@ async function main() {
   const storiesData = await loadJSON('stories');
   const storiesBag = storiesData.stories ?? {};
 
+  // 5d: plantillas con variables — se arman SIEMPRE con fillText, nunca
+  // concatenando en código. Se leen una vez (son estáticas).
+  const pointLines = {
+    label: textOf(textsBag, 'pointsLabelLine'),
+    count: textOf(textsBag, 'pendingCountLine'),
+    pending: textOf(textsBag, 'pendingLabelLine'),
+  };
+  const pointVars = {
+    label: textOf(textsBag, 'pointsLabel'),
+    pendingLabel: textOf(textsBag, 'pendingLabel'),
+  };
+  const balanceText = textOf(textsBag, 'balanceText');
+  const sendText = textOf(textsBag, 'sendText');
+
   renderAppName(texts.appName);
   renderCharacterName(texts.characterName);
   renderGoalName(texts.goalName);
@@ -100,11 +114,11 @@ async function main() {
   function renderAll() {
     const { sent, pending } = computeDayPoints(session.levelsByHabit, habits);
     renderHabitList(habits, session.levelsByHabit, textsBag, stepsPerPoint);
-    renderPoints(sent, pending, textOf(textsBag, 'pointsLabel'), textOf(textsBag, 'pendingLabel'));
-    renderSendButton(pending, textOf(textsBag, 'sendLabel'));
-    renderBalance(computeBalance(), textsBag.balanceLabel);
+    renderPoints(sent, pending, pointLines, pointVars);
+    renderSendButton(pending, sendText, textOf(textsBag, 'sendLabel'));
+    renderBalance(computeBalance(), balanceText, textsBag.balanceLabel);
     renderWorldMap(world, session.worldState, worldTexts);
-    renderWorldBalance(computeBalance(), textsBag.balanceLabel);
+    renderWorldBalance(computeBalance(), balanceText, textsBag.balanceLabel);
     renderWorldPanel(world, session.worldState, worldTexts, storiesBag, computeBalance(), panelHandlers);
   }
 

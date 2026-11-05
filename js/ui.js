@@ -1,4 +1,4 @@
-import { textOf } from './text.js';
+import { textOf, fillText } from './text.js';
 import { getLevelValue } from './habits.js';
 
 export function renderAppName(name) {
@@ -61,8 +61,7 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
     if (habit.style === 'number') {
       const rule = document.createElement('span');
       rule.className = 'habit-number-rule';
-      rule.textContent = textOf(texts, 'stepsRule')
-        .replace('{stepsPerPoint}', String(stepsPerPoint));
+      rule.textContent = fillText(textOf(texts, 'stepsRule'), { stepsPerPoint });
       info.appendChild(rule);
 
       const input = document.createElement('input');
@@ -159,8 +158,9 @@ export function clearStepsError(habitId) {
 // (getLevelValue viene de habits.js — 5c: no duplicar la lógica.)
 
 // M3: "Puntos de hoy" muestra enviados + pendientes (los pendientes se
-// distinguen visualmente con su propia clase).
-export function renderPoints(sent, pending, label, pendingLabel) {
+// distinguen visualmente con su propia clase). 5d: lines = plantillas
+// {label, count, pending} de texts.json; vars = {label, pendingLabel}.
+export function renderPoints(sent, pending, lines, vars) {
   const element = document.getElementById('points-total');
   if (!element) {
     return;
@@ -172,7 +172,7 @@ export function renderPoints(sent, pending, label, pendingLabel) {
   sentSpan.textContent = String(sent);
 
   const labelSpan = document.createElement('span');
-  labelSpan.textContent = ` ${label}`;
+  labelSpan.textContent = fillText(lines.label, vars);
 
   element.appendChild(sentSpan);
   element.appendChild(labelSpan);
@@ -183,10 +183,10 @@ export function renderPoints(sent, pending, label, pendingLabel) {
 
     const pendingSpan = document.createElement('span');
     pendingSpan.className = 'points-pending-count';
-    pendingSpan.textContent = `+${pending}`;
+    pendingSpan.textContent = fillText(lines.count, { pending });
 
     const pendingText = document.createElement('span');
-    pendingText.textContent = ` ${pendingLabel}`;
+    pendingText.textContent = fillText(lines.pending, vars);
 
     pendingWrap.appendChild(pendingSpan);
     pendingWrap.appendChild(pendingText);
@@ -195,20 +195,21 @@ export function renderPoints(sent, pending, label, pendingLabel) {
 }
 
 // M3: botón Enviar bajo la lista de hábitos (deshabilitado si no hay
-// pendientes).
-export function renderSendButton(pending, label) {
+// pendientes). 5d: sendText = plantilla "{label} ({pending})".
+export function renderSendButton(pending, sendText, label) {
   const button = document.getElementById('send-btn');
   if (!button) {
     return;
   }
-  button.textContent = `${label} (${pending})`;
+  button.textContent = fillText(sendText, { label, pending });
   button.disabled = pending <= 0;
 }
 
-export function renderBalance(balance, label) {
+// 5d: balanceText = plantilla "{label}: {balance}".
+export function renderBalance(balance, balanceText, label) {
   const element = document.getElementById('points-balance');
   if (element) {
-    element.textContent = `${label}: ${balance}`;
+    element.textContent = fillText(balanceText, { label, balance });
   }
 }
 

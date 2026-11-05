@@ -101,14 +101,18 @@ export function renderWorldMap(world, state, worldTexts) {
     }
   }
   if (location && city) {
-    location.textContent = `${worldTexts.locationLabel} ${city.name}`;
+    location.textContent = fillText(textOf(worldTexts, 'locationText'), {
+      label: worldTexts.locationLabel,
+      city: city.name,
+    });
   }
 }
 
-export function renderWorldBalance(balance, label) {
+// 5d: balanceText = plantilla "{label}: {balance}" (mismo texto que en Hoy).
+export function renderWorldBalance(balance, balanceText, label) {
   const element = document.getElementById('world-balance');
   if (element) {
-    element.textContent = `${label}: ${balance}`;
+    element.textContent = fillText(balanceText, { label, balance });
   }
 }
 
@@ -135,12 +139,18 @@ export function renderWorldPanel(world, state, worldTexts, storiesBag, balance, 
 
     const title = document.createElement('p');
     title.className = 'panel-title';
-    title.textContent = `${worldTexts.travelingLabel} ${dest ? dest.name : state.trip.dest}`;
+    title.textContent = fillText(textOf(worldTexts, 'travelText'), {
+      label: worldTexts.travelingLabel,
+      dest: dest ? dest.name : state.trip.dest,
+    });
     panel.appendChild(title);
 
     const progress = document.createElement('p');
     progress.className = 'trip-progress';
-    progress.textContent = `${worldTexts.progressLabel} ${state.trip.cost - state.trip.progress}`;
+    progress.textContent = fillText(textOf(worldTexts, 'progressText'), {
+      label: worldTexts.progressLabel,
+      pending: state.trip.cost - state.trip.progress,
+    });
     panel.appendChild(progress);
 
     const cancel = document.createElement('button');
@@ -157,7 +167,10 @@ export function renderWorldPanel(world, state, worldTexts, storiesBag, balance, 
     const dest = cityById(world, state.trip.dest);
     const title = document.createElement('p');
     title.className = 'panel-title';
-    title.textContent = `${worldTexts.arrivedLabel} ${dest ? dest.name : state.trip.dest}`;
+    title.textContent = fillText(textOf(worldTexts, 'arrivedText'), {
+      label: worldTexts.arrivedLabel,
+      dest: dest ? dest.name : state.trip.dest,
+    });
     panel.appendChild(title);
   }
 
@@ -178,17 +191,23 @@ export function renderWorldPanel(world, state, worldTexts, storiesBag, balance, 
     row.className = 'dest-row';
 
     const name = document.createElement('span');
-    // Dos caminos: "Ciudad · por Bahía" (texto routeVia + campo via de la ruta).
+    // Dos caminos: "Ciudad · por Bahía" (plantilla destViaText + campo via).
     const via = dest.route?.via;
     name.textContent = via
-      ? `${dest.city.name} · ${worldTexts.routeVia} ${via}`
+      ? fillText(textOf(worldTexts, 'destViaText'), {
+        city: dest.city.name,
+        label: worldTexts.routeVia,
+        route: via,
+      })
       : dest.city.name;
     row.appendChild(name);
 
     const meta = document.createElement('span');
     meta.className = 'dest-meta';
-    const dragonHint = dest.dragonEdge ? ` · ${worldTexts.dragonTitle}` : '';
-    meta.textContent = `${dest.cost}${dragonHint}`;
+    const dragonHint = dest.dragonEdge
+      ? fillText(textOf(worldTexts, 'dragonSuffix'), { title: worldTexts.dragonTitle })
+      : '';
+    meta.textContent = fillText(textOf(worldTexts, 'destMetaText'), { cost: dest.cost, hint: dragonHint });
     row.appendChild(meta);
 
     row.addEventListener('click', () => handlers.onSelectDestination(dest));
@@ -210,7 +229,10 @@ function appendCityActions(world, state, worldTexts, storiesBag, balance, handle
     const enter = document.createElement('button');
     enter.type = 'button';
     enter.className = 'habit-btn complete dest-enter';
-    enter.textContent = `${worldTexts.enterPrefix} ${cityName}`;
+    enter.textContent = fillText(textOf(worldTexts, 'enterText'), {
+      label: worldTexts.enterPrefix,
+      city: cityName,
+    });
     enter.addEventListener('click', handlers.onEnterCity);
     panel.appendChild(enter);
   }
@@ -240,7 +262,10 @@ function appendCityActions(world, state, worldTexts, storiesBag, balance, handle
   const explore = document.createElement('button');
   explore.type = 'button';
   explore.className = 'habit-btn neutral dest-explore';
-  explore.textContent = `${worldTexts.exploreButton} · ${cost}`;
+  explore.textContent = fillText(textOf(worldTexts, 'exploreCostText'), {
+    label: worldTexts.exploreButton,
+    cost,
+  });
   explore.disabled = !entered || balance < cost;
   explore.addEventListener('click', handlers.onExploreCity);
   panel.appendChild(explore);
