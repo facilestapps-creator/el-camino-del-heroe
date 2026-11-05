@@ -380,8 +380,11 @@ M1–M7 (specs de cada mini-bloque en esta sección):
 - **Refactor antes de seguir con funciones nuevas** (P5: almacenamiento/capas, dividir
   `app.js`, código muerto, textos con variables).
 - **Pruebas con `node --test`** (Node 18+) en `tests/` (P4) — **implementado
-  2026-11-04**: `npm test` (equivale a `node --test tests/`), 34 pruebas de lógica
-  (habits, world, backup, datos) con `node:test` + `node:assert/strict`, cero
+  2026-11-04**: `npm test` (equivale a `node --test` sin argumentos — desde A
+  (2026-11-05), porque `node --test tests/` falla en Node 21+ y el runner solo
+  toma `*.test.js`, con lo que `tests/helpers/` no corre como prueba), 34
+  pruebas de lógica al nacer (44 hoy; habits, world, backup, datos) con
+  `node:test` + `node:assert/strict`, cero
   dependencias y localStorage falso en `tests/helpers/localStorage.js`.
   **Las pruebas se corren antes de cada push de código**: si fallan, no se pushea.
 - **Tope de pasos: 30.000** (`maxSteps` en `habits.json`) — **implementado** en el

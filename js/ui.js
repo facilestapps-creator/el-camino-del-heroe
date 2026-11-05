@@ -36,9 +36,9 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
   for (const habit of habits) {
     const entry = levelsByHabit?.[habit.id];
     const level = getLevelValue(entry);
-    // M3: un hábito ya enviado (sentPoints > 0) queda bloqueado el día.
-    // M1 (arreglo de pasos): el campo de pasos NUNCA se bloquea — la regla
-    // sigue para los hábitos por niveles.
+    // Un hábito ya enviado (sentPoints > 0) queda bloqueado el día; el campo
+    // de pasos NUNCA se bloquea (se valida por mínimo/tope), solo se bloquean
+    // los hábitos por niveles.
     const locked = habit.style !== 'number'
       && typeof entry === 'object' && entry !== null && (entry.sentPoints ?? 0) > 0;
 
@@ -57,7 +57,7 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
     label.textContent = habit.label;
     info.appendChild(label);
 
-    // M3: pasos con ingreso manual (total del día) y su regla debajo.
+    // Pasos con ingreso manual (total del día) y su regla debajo.
     if (habit.style === 'number') {
       const rule = document.createElement('span');
       rule.className = 'habit-number-rule';
@@ -130,7 +130,7 @@ function lockedTag(texts) {
   return tag;
 }
 
-// M2: aviso de validación debajo del campo de pasos. El mensaje ya viene
+// Aviso de validación debajo del campo de pasos. El mensaje ya viene
 // armado (textOf + fillText) de quien llama; solo se muestra/oculta acá.
 export function showStepsError(habitId, message) {
   const row = document.querySelector(`.habit[data-habit-id="${habitId}"]`);
@@ -154,11 +154,8 @@ export function clearStepsError(habitId) {
   }
 }
 
-// Acepta formato viejo (numero) y formato nuevo ({ level, points }).
-// (getLevelValue viene de habits.js — 5c: no duplicar la lógica.)
-
-// M3: "Puntos de hoy" muestra enviados + pendientes (los pendientes se
-// distinguen visualmente con su propia clase). 5d: lines = plantillas
+// "Puntos de hoy" muestra enviados + pendientes (los pendientes se
+// distinguen visualmente con su propia clase). lines = plantillas
 // {label, count, pending} de texts.json; vars = {label, pendingLabel}.
 export function renderPoints(sent, pending, lines, vars) {
   const element = document.getElementById('points-total');
@@ -194,8 +191,8 @@ export function renderPoints(sent, pending, lines, vars) {
   }
 }
 
-// M3: botón Enviar bajo la lista de hábitos (deshabilitado si no hay
-// pendientes). 5d: sendText = plantilla "{label} ({pending})".
+// Botón Enviar bajo la lista de hábitos (deshabilitado si no hay
+// pendientes). sendText = plantilla "{label} ({pending})".
 export function renderSendButton(pending, sendText, label) {
   const button = document.getElementById('send-btn');
   if (!button) {
@@ -205,7 +202,7 @@ export function renderSendButton(pending, sendText, label) {
   button.disabled = pending <= 0;
 }
 
-// 5d: balanceText = plantilla "{label}: {balance}".
+// balanceText = plantilla "{label}: {balance}".
 export function renderBalance(balance, balanceText, label) {
   const element = document.getElementById('points-balance');
   if (element) {
@@ -213,7 +210,7 @@ export function renderBalance(balance, balanceText, label) {
   }
 }
 
-// Bloque B: textos de los botones de respaldo.
+// Textos de los botones de respaldo.
 export function renderBackupTexts(exportLabel, importLabel) {
   const exportButton = document.getElementById('backup-export');
   if (exportButton) {
@@ -225,7 +222,7 @@ export function renderBackupTexts(exportLabel, importLabel) {
   }
 }
 
-// M6: "Último respaldo: …" bajo los botones. highlight = nunca / ≥ umbral.
+// "Último respaldo: …" bajo los botones. highlight = nunca / ≥ umbral.
 export function renderLastBackup(message, highlight) {
   const element = document.getElementById('backup-last');
   if (!element) {
@@ -236,7 +233,7 @@ export function renderLastBackup(message, highlight) {
   element.classList.toggle('backup-last--stale', Boolean(highlight));
 }
 
-// Bloque B: mensaje de error bajo los botones de respaldo.
+// Mensaje de error bajo los botones de respaldo.
 export function showBackupError(message) {
   const element = document.getElementById('backup-error');
   if (element) {
@@ -253,10 +250,9 @@ export function clearBackupError() {
   }
 }
 
-// M4: cartel genérico de confirmación. Recibe el mensaje (opcional) y los
-// botones a mostrar: [{ label, className, onClick }].
-// Reemplaza al viejo showBackupConfirm (Bloque B) y ahora lo usan también
-// los carteles de viaje.
+// Cartel genérico de confirmación: lo comparten respaldo y viaje (un solo
+// diálogo para todo). Recibe el mensaje (opcional) y los botones a mostrar:
+// [{ label, className, onClick }].
 export function showConfirm(message, buttons) {
   const overlay = document.getElementById('confirm-overlay');
   const textElement = document.getElementById('confirm-text');

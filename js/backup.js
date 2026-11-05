@@ -2,10 +2,9 @@ import { SCHEMA_VERSION, BACKUP_FILE_PREFIX, META_KEY, STORAGE_PREFIX, DATA_KEY,
 import { getTodayKey } from './habits.js';
 import { loadFromStorage, saveToStorage, collectByPrefix, replaceByPrefix } from './storage.js';
 
-// Bloque B — Respaldo: exportar (mini-bloque 2).
-// M6: meta:v1 ({ lastBackupAt }) se guarda ANTES de armar el archivo, así
-// queda incluido dentro del propio respaldo. 5a: todo el acceso crudo a
-// localStorage vive en storage.js — acá solo se usa la capa.
+// Respaldo: exportar/importar. meta:v1 ({ lastBackupAt }) se guarda ANTES de
+// armar el archivo, así queda incluido dentro del propio respaldo. Todo el
+// acceso crudo a localStorage vive en storage.js — acá solo se usa la capa.
 
 export function loadMeta() {
   const parsed = loadFromStorage(META_KEY, {});
@@ -47,7 +46,7 @@ export function createBackup() {
 }
 
 export function exportBackup() {
-  // M6: la fecha se registra ANTES de armar el archivo (queda dentro).
+  // La fecha se registra ANTES de armar el archivo (queda dentro del respaldo).
   saveLastBackupAt();
   const backup = createBackup();
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -61,7 +60,7 @@ export function exportBackup() {
   URL.revokeObjectURL(url);
 }
 
-// Mini-bloque 3: lectura y validación del archivo elegido.
+// Lectura y validación del archivo elegido.
 
 export function parseBackupText(text) {
   try {
@@ -73,7 +72,7 @@ export function parseBackupText(text) {
 
 // Respaldo válido = JSON con fecha de exportación, versión del esquema y
 // datos con al menos una clave "habitQuest:".
-// M6: además, SI el archivo trae data:v1 / world:v1, deben cumplir su
+// Además, SI el archivo trae data:v1 / world:v1, deben cumplir su
 // esquema (days con entradas de los esquemas 1/2/3; world con spent,
 // currentCity, visited y explored). Si no → inválido, sin tocar datos.
 export function isValidBackup(backup) {
@@ -158,8 +157,9 @@ function parseIfNeeded(value) {
   }
 }
 
-// Mini-bloque 4: aplicar el respaldo — borra TODAS las claves habitQuest:
-// actuales y escribe las del archivo. La recarga la dispara quien lo llama.
+// Aplicar el respaldo — borra las claves habitQuest: actuales y escribe SOLO
+// las del archivo con ese prefijo (las de otras apps no se tocan). La recarga
+// la dispara quien lo llama.
 export function applyBackup(backup) {
   replaceByPrefix(STORAGE_PREFIX, backup.data);
 }

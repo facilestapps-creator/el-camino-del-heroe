@@ -192,3 +192,57 @@ test('P6) costos derivados: total 282, enteros y más corto = más barato', () =
   const cheapest = world.routes.reduce((min, r) => (r.points < min.points ? r : min));
   assert.equal(cheapest.id, 'arv-vorn');
 });
+
+// M3 — Sin la regla de medición no se puede hidratar el mapa: se falla fuerte
+// (antes quedaban rutas sin points y NaN en pantalla).
+test('M3: falta imageSize o no es válido → Error que nombra el campo', () => {
+  const sinImage = structuredClone(world);
+  delete sinImage.imageSize;
+  assert.throws(() => hydrateRouteCosts(sinImage), /imageSize/);
+
+  const anchoCero = structuredClone(world);
+  anchoCero.imageSize = { width: 0, height: 1121 };
+  assert.throws(() => hydrateRouteCosts(anchoCero), /imageSize/);
+
+  const altoRaro = structuredClone(world);
+  altoRaro.imageSize = { width: 963, height: 'alto' };
+  assert.throws(() => hydrateRouteCosts(altoRaro), /imageSize/);
+});
+
+test('M3: pxPerPoint ausente o no positivo → Error que nombra el campo', () => {
+  const sinPp = structuredClone(world);
+  delete sinPp.pxPerPoint;
+  assert.throws(() => hydrateRouteCosts(sinPp), /pxPerPoint/);
+
+  const cero = structuredClone(world);
+  cero.pxPerPoint = 0;
+  assert.throws(() => hydrateRouteCosts(cero), /pxPerPoint/);
+
+  const negativo = structuredClone(world);
+  negativo.pxPerPoint = -13.6;
+  assert.throws(() => hydrateRouteCosts(negativo), /pxPerPoint/);
+});
+
+test('M3: ruta con ciudad inexistente → Error que nombra la ruta', () => {
+  const toRaro = structuredClone(world);
+  toRaro.routes[0] = { ...toRaro.routes[0], to: 'ciudad-fantasma' };
+  assert.throws(() => hydrateRouteCosts(toRaro), /arv-vorn/);
+  assert.throws(() => hydrateRouteCosts(toRaro), /ciudad-fantasma/);
+
+  const fromRaro = structuredClone(world);
+  fromRaro.routes[2] = { ...fromRaro.routes[2], from: 'ninguna' };
+  assert.throws(() => hydrateRouteCosts(fromRaro), /arv-sand-bay/);
+});
+
+test('M3: el world.json real sigue hidratando bien', () => {
+  const raw = JSON.parse(
+    readFileSync(new URL('../data/world.json', import.meta.url), 'utf8'),
+  );
+  const hidratado = hydrateRouteCosts(raw);
+  let total = 0;
+  for (const r of hidratado.routes) {
+    assert.ok(Number.isInteger(r.points) && r.points > 0, `ruta ${r.id}: points = ${r.points}`);
+    total += r.points;
+  }
+  assert.equal(total, 282);
+});

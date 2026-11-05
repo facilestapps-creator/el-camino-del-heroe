@@ -44,12 +44,12 @@ import { renderLastBackupLine, setupBackupFlow } from './backupFlow.js';
 async function main() {
   const texts = await loadJSON('texts');
   const textsBag = texts.texts ?? {};
-  // M5: historias por ciudad (data/stories.json).
+  // Las historias por ciudad también viven en data/ (nada hardcodeado).
   const storiesData = await loadJSON('stories');
   const storiesBag = storiesData.stories ?? {};
 
-  // 5d: plantillas con variables — se arman SIEMPRE con fillText, nunca
-  // concatenando en código. Se leen una vez (son estáticas).
+  // Plantillas con variables: se arman SIEMPRE con fillText, nunca concatenando
+  // en código (los textos se editan en data/). Se leen una vez (son estáticas).
   const pointLines = {
     label: textOf(textsBag, 'pointsLabelLine'),
     count: textOf(textsBag, 'pendingCountLine'),
@@ -67,7 +67,7 @@ async function main() {
   renderGoalName(texts.goalName);
   renderHabitsTitle(textOf(textsBag, 'habitsTitle'));
   renderBackupTexts(textsBag.exportLabel, textsBag.importLabel);
-  // M6: "Último respaldo: …" bajo los botones (resaltado si nunca o ≥ umbral).
+  // "Último respaldo: …" bajo los botones (resaltado si nunca o ≥ umbral).
   renderLastBackupLine(textsBag);
 
   document.title = texts.appName;
@@ -77,10 +77,11 @@ async function main() {
   const stepsPerPoint = typeof habitsData.stepsPerPoint === 'number' ? habitsData.stepsPerPoint : 700;
   const maxSteps = typeof habitsData.maxSteps === 'number' ? habitsData.maxSteps : 30000;
 
-  // M3: cambio de día — los pendientes de días anteriores se envían solos.
+  // Al arrancar los pendientes de días anteriores se envían solos, para que
+  // no queden puntos trabados en días viejos.
   const initialDays = sendPastDays(migrateDaysData(loadDays(), habits));
 
-  // Fase 2: estado del mundo.
+  // Estado del mundo: se carga y se re-guarda para normalizar lo persistido.
   const world = await getWorld();
   const worldState = loadWorldState(world);
   saveWorldState(worldState);
@@ -104,7 +105,7 @@ async function main() {
     if (flowBalanceToTrip(session.worldState, computeBalance()) > 0) {
       saveWorldState(session.worldState);
     }
-    // M4: al completarse el viaje, la llegada te deja en la ciudad destino.
+    // Al completarse el viaje, la llegada te deja en la ciudad destino.
     if (settleArrival(session.worldState)) {
       saveWorldState(session.worldState);
     }
@@ -146,7 +147,8 @@ async function main() {
     showView(currentView);
   });
 
-  // Bloque A: al volver a ser visible, recalcular fecha de hoy y recargar el día.
+  // Al volver a ser visible, recalcular la fecha de hoy y recargar el día:
+  // la pestaña pudo quedarse abierta de ayer.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') {
       return;

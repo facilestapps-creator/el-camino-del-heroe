@@ -2,7 +2,7 @@ import { SCHEMA_VERSION } from './config.js';
 import { loadJSON } from './dataFiles.js';
 import { saveDays } from './storage.js';
 
-// Logica de habitos y calculo de puntos (Fase 1 + Bloque A + M3 esquema v3).
+// Lógica de hábitos y cálculo de puntos (esquema v3: { level, points, sentPoints, steps }).
 
 // Devuelve habits.json completo: { stepsPerPoint, habits }.
 export async function getHabitsData() {
@@ -51,7 +51,7 @@ export function saveTodayLevel(daysData, habitId, level, habit) {
   return next;
 }
 
-// Valida los pasos ingresados (M2): el mínimo es lo ya ENVIADO
+// Valida los pasos ingresados: el mínimo es lo ya ENVIADO
 // (sentPoints × stepsPerPoint — lo enviado no se puede bajar) y el tope es
 // maxSteps. Campo vacío o no numérico = 0 y aplica la misma regla.
 // Devuelve { ok, reason, min, max } (reason: 'min' | 'max' cuando !ok).
@@ -130,7 +130,7 @@ export function computeDayPoints(levelsByHabit, habits) {
 }
 
 // Saldo: solo los puntos YA ENVIADOS de todos los dias cuentan como
-// disponibles (M3). Los pendientes no suman ni fluyen al viaje.
+// disponibles. Los pendientes no suman ni fluyen al viaje.
 export function computeTotalSent(daysData) {
   let total = 0;
   const days = daysData?.days ?? {};

@@ -17,7 +17,7 @@ import { textOf, fillText } from './text.js';
 export function createWorldFlow({ world, session, textsBag, computeBalance, refresh }) {
   const worldTexts = world.texts ?? {};
 
-  // M4: tras elegir opción (y la moneda si hay dragón), verificar el saldo.
+  // Tras elegir opción (y la moneda si hay dragón), verificar el saldo.
   // Con saldo suficiente el viaje empieza directo; sin saldo, cartel que
   // ofrece empezar igual (Aceptar) o no hacer nada (Cancelar).
   function choosePlan(found, withExplore) {
@@ -56,7 +56,7 @@ export function createWorldFlow({ world, session, textsBag, computeBalance, refr
     };
     if (found.dragonEdge) {
       const roll = rollDragon(session.worldState, world, found.dragonEdge.id);
-      // Resultado persistido AL TIRAR (M2): recargar no permite re-tirar.
+      // El resultado se persiste AL TIRAR: recargar no permite re-tirar.
       saveWorldState(session.worldState);
       showDragonCoin(world, roll, beginTrip);
     } else {
@@ -67,7 +67,7 @@ export function createWorldFlow({ world, session, textsBag, computeBalance, refr
   // Handlers para renderWorldPanel (worldUI). Se construyen una vez: leen el
   // estado a través de session.* (mutable) y refrescan vía el orquestador.
   const panelHandlers = {
-    // M4: elegir una ciudad abre el cartel de 2 opciones (sin Viajar suelto).
+    // Elegir una ciudad abre el cartel de 2 opciones (sin Viajar suelto).
     // Con dos caminos la fila trae el objeto destino completo (el .find por
     // cityId elegiría siempre la primera ruta).
     onSelectDestination: (found) => {

@@ -22,8 +22,10 @@ Requiere **Node 18 o superior**. Desde `habit-quest/`:
 npm test
 ```
 
-Equivalente sin npm: `node --test tests/` (es el comando exacto que ejecuta el
-script `test` de `package.json`). Cubren solo lógica (habits, world, backup y
+Equivalente sin npm: `node --test` (es el comando exacto que ejecuta el
+script `test` de `package.json`; sin argumentos, así es portable a Node 21+ —
+el runner solo toma los archivos `*.test.js`, con lo que `tests/helpers/` no
+corre como prueba). Cubren solo lógica (habits, world, backup y
 `data/`); no tocan DOM ni pantallas.
 
 ## Estado y documentación

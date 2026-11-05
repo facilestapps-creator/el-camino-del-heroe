@@ -36,7 +36,7 @@ export function setupHabitsFlow({ session, habits, stepsPerPoint, maxSteps, text
     refresh();
   });
 
-  // M3: pasos manuales (ingreso manual del total del día). M2: validación de
+  // Pasos manuales (ingreso manual del total del día): validación de
   // mínimo (lo ya enviado) y tope (maxSteps). En rechazo: no se guarda, el
   // campo vuelve al último valor guardado y se muestra el mensaje debajo (sin
   // refresh, que destruiría el span del mensaje).
@@ -67,7 +67,7 @@ export function setupHabitsFlow({ session, habits, stepsPerPoint, maxSteps, text
     refresh();
   });
 
-  // M3: Enviar pendientes del día (varias veces por día).
+  // Enviar pendientes del día (se puede enviar varias veces por día).
   document.getElementById('send-btn').addEventListener('click', () => {
     session.daysData = sendTodayPoints(session.daysData);
     session.levelsByHabit = getTodayLevels(session.daysData);

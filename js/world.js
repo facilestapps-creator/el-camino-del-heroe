@@ -2,24 +2,31 @@ import { WORLD_KEY, WORLD_SCHEMA_VERSION } from './config.js';
 import { loadJSON } from './dataFiles.js';
 import { loadFromStorage, saveToStorage } from './storage.js';
 
-// Fase 2 — Modelo del mundo: estado del viajero, costos y caminos.
+// Modelo del mundo: estado del viajero, costos y caminos.
 
 export async function getWorld() {
   const world = await loadJSON('world');
   return hydrateRouteCosts(world);
 }
 
-// P6 — Costos derivados del largo del trazado: los routes NO traen "points"
+// Costos derivados del largo del trazado: los routes NO traen "points"
 // manual en world.json; al cargar se calcula points = round(largo_px / pxPerPoint).
-// Tanto el tamaño de imagen como pxPerPoint (13,6) están declarados en world.json.
+// imageSize y pxPerPoint están declarados en world.json: sin ellos no se puede
+// medir el mapa y los costos saldrían NaN, así que se falla fuerte acá (con un
+// mensaje que nombre el campo o la ruta) en vez de dejar rutas sin points.
 export function hydrateRouteCosts(world) {
   const image = world.imageSize;
-  const pxPerPoint = world.pxPerPoint;
-  if (!image || typeof pxPerPoint !== 'number' || pxPerPoint <= 0) {
-    return world;
+  const sizeOk = image
+    && typeof image.width === 'number' && image.width > 0
+    && typeof image.height === 'number' && image.height > 0;
+  if (!sizeOk) {
+    throw new Error('world.json: falta imageSize (width y height deben ser números > 0)');
+  }
+  if (typeof world.pxPerPoint !== 'number' || !(world.pxPerPoint > 0)) {
+    throw new Error('world.json: pxPerPoint debe ser un número > 0');
   }
   for (const route of world.routes) {
-    route.points = Math.round(routeLengthPx(world, route) / pxPerPoint);
+    route.points = Math.round(routeLengthPx(world, route) / world.pxPerPoint);
   }
   return world;
 }
@@ -28,6 +35,10 @@ export function hydrateRouteCosts(world) {
 function routeLengthPx(world, route) {
   const from = world.cities.find((c) => c.id === route.from);
   const to = world.cities.find((c) => c.id === route.to);
+  if (!from || !to) {
+    const missing = !from ? route.from : route.to;
+    throw new Error(`world.json: la ruta "${route.id}" referencia una ciudad inexistente "${missing}"`);
+  }
   const line = [from, ...(route.waypoints ?? []), to];
   let total = 0;
   for (let i = 0; i < line.length - 1; i += 1) {
@@ -81,7 +92,8 @@ function edgesOf(world, cityId) {
   return world.routes.filter((r) => r.from === cityId || r.to === cityId);
 }
 
-// Camino más corto (Opción B) entre dos ciudades, por costos BASE.
+// Camino más corto entre dos ciudades, por costos BASE (el multiplicador de
+// viaje y el riesgo de dragón se aplican después).
 // Devuelve { path, edges, baseCost } o null si no hay camino.
 export function shortestPath(world, from, to) {
   if (from === to) {
@@ -409,7 +421,8 @@ export function cancelTrip(state) {
 }
 
 // Entrar: registra la ciudad como visitada (gratis) y HABILITA Explorar.
-// Requiere viaje llegado. Limpia dragonRolls (M2).
+// Requiere viaje llegado. Limpia dragonRolls para que el próximo viaje
+// vuelva a tirar la moneda.
 export function enterCity(state) {
   if (!tripArrived(state.trip)) {
     return false;

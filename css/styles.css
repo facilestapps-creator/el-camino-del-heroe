@@ -67,15 +67,6 @@ body {
   font-size: 1.1rem;
 }
 
-.habit-desc {
-  font-size: 0.85rem;
-  color: #94a3b8;
-}
-
-.habit-desc-full {
-  color: #64748b;
-}
-
 .habit-btn {
   padding: 0.75rem 1.25rem;
   border-radius: 999px;

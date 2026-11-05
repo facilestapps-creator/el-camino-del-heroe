@@ -1,4 +1,4 @@
-// Fase 2 — Render de la vista del mundo (mapa, ubicación, panel de viaje).
+// Render de la vista del mundo (mapa, ubicación, panel de viaje).
 import { destinationsFrom, exploreCost, hasExplored, markerPosition, tripArrived } from './world.js';
 import { textOf, fillText } from './text.js';
 
@@ -91,7 +91,7 @@ export function renderWorldMap(world, state, worldTexts) {
     image.alt = worldTexts.worldTitle ?? '';
   }
   if (marker) {
-    // M4: con viaje activo el marcador avanza proporcional del camino;
+    // Con viaje activo el marcador avanza proporcional del camino;
     // sin viaje, en la ciudad actual.
     const pos = markerPosition(world, state);
     if (pos) {
@@ -108,7 +108,7 @@ export function renderWorldMap(world, state, worldTexts) {
   }
 }
 
-// 5d: balanceText = plantilla "{label}: {balance}" (mismo texto que en Hoy).
+// balanceText = plantilla "{label}: {balance}" (mismo texto que en Hoy).
 export function renderWorldBalance(balance, balanceText, label) {
   const element = document.getElementById('world-balance');
   if (element) {
@@ -117,7 +117,7 @@ export function renderWorldBalance(balance, balanceText, label) {
 }
 
 // Panel de viaje: viajando → llegaste (Entrar + ciudad arriba) → elegir destino.
-// M4: las acciones de la ciudad (Entrar / Explorar / Explorada) van SIEMPRE
+// Las acciones de la ciudad (Entrar / Explorar / Explorada) van SIEMPRE
 // ANTES de la lista de destinos (nunca abajo de la página). Elegir una fila
 // abre el cartel de 2 opciones (Viajar / Viajar, entrar y explorar).
 function cityById(world, id) {
@@ -218,7 +218,7 @@ export function renderWorldPanel(world, state, worldTexts, storiesBag, balance, 
 
 // Acciones de la ciudad actual: "Entrar" (si no está registrada / al llegar)
 // y debajo "Explorar" (solo habilitado si la ciudad está ENTRADA y con saldo)
-// o la etiqueta "Explorada" + su historia (M5). Quedan sobre la lista de destinos.
+// o la etiqueta "Explorada" + su historia. Quedan sobre la lista de destinos.
 function appendCityActions(world, state, worldTexts, storiesBag, balance, handlers, panel, arrived) {
   const city = cityById(world, state.currentCity);
   const cityName = city ? city.name : state.currentCity;
@@ -243,7 +243,7 @@ function appendCityActions(world, state, worldTexts, storiesBag, balance, handle
     exploredTag.textContent = worldTexts.exploredLabel;
     panel.appendChild(exploredTag);
 
-    // M5: historia de la ciudad bajo "Explorada". Si no está en
+    // Historia de la ciudad bajo "Explorada". Si no está en
     // stories.json → nada + aviso en consola.
     const story = storiesBag?.[state.currentCity];
     if (typeof story === 'string' && story !== '') {

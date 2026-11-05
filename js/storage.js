@@ -59,8 +59,10 @@ export function collectByPrefix(prefix) {
   return result;
 }
 
-// Reemplaza TODAS las claves del prefijo por las del archivo: string = valor
-// crudo ya serializado; el resto se serializa.
+// Reemplaza TODAS las claves del prefijo por las del archivo (solo las claves
+// del archivo con ese prefijo: otras apps comparten el mismo localStorage y un
+// respaldo no puede tocarlas ni fallar por ellas); string = valor crudo ya
+// serializado; el resto se serializa.
 export function replaceByPrefix(prefix, data) {
   const current = [];
   for (let i = 0; i < localStorage.length; i += 1) {
@@ -73,6 +75,9 @@ export function replaceByPrefix(prefix, data) {
     localStorage.removeItem(key);
   }
   for (const [key, value] of Object.entries(data)) {
+    if (!key.startsWith(prefix)) {
+      continue;
+    }
     localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
   }
 }

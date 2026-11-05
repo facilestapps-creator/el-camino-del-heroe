@@ -18,7 +18,7 @@ import {
 } from './ui.js';
 import { BACKUP_STALE_DAYS } from './config.js';
 
-// M6: "Último respaldo: …" bajo los botones (resaltado si nunca o ≥ umbral).
+// La línea avisa qué tan viejo está el último respaldo (resaltado si nunca o ≥ umbral).
 export function renderLastBackupLine(textsBag) {
   const days = daysSinceBackup(loadMeta());
   let message = '';
@@ -42,14 +42,14 @@ export function renderLastBackupLine(textsBag) {
 // Conecta los botones de respaldo de la vista "Hoy".
 // onExported: se llama después de exportar (para refrescar la línea de arriba).
 export function setupBackupFlow({ textsBag, onExported }) {
-  // Bloque B: exportar respaldo (mini-bloque 2). M6: al exportar se registra
-  // la fecha y se refresca el contador "Último respaldo".
+  // Al exportar se registra la fecha y se refresca el contador "Último respaldo".
   document.getElementById('backup-export').addEventListener('click', () => {
     exportBackup();
     onExported();
   });
 
-  // Bloque B: importar — elegir, validar, confirmar y aplicar.
+  // Importar: elegir archivo, validar y pedir confirmación antes de reemplazar
+  // todos los datos (no se puede deshacer).
   let pendingBackup = null;
   const fileInput = document.getElementById('backup-file-input');
   fileInput.addEventListener('change', () => {
