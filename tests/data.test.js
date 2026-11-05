@@ -97,3 +97,14 @@ test('cada hábito tiene los campos requeridos para su estilo', () => {
     }
   }
 });
+
+// P5c: la app solo implementa dos estilos (direct y number); el estilo
+// cíclico viejo se eliminó, así que un estilo desconocido es un error de datos.
+test('todo hábito usa un estilo soportado (direct o number)', () => {
+  for (const h of habitsData.habits) {
+    assert.ok(
+      h.style === 'direct' || h.style === 'number',
+      `${h.id}: estilo "${h.style}" no soportado (válidos: direct, number)`,
+    );
+  }
+});

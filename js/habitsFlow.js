@@ -27,15 +27,9 @@ export function setupHabitsFlow({ session, habits, stepsPerPoint, maxSteps, text
     }
 
     const currentLevel = getLevelValue(session.levelsByHabit[habitId]);
-    let nextLevel;
-    if (button.dataset.level !== undefined) {
-      // Boton directo: elige el nivel; tocar el activo lo desmarca.
-      const desiredLevel = Number(button.dataset.level);
-      nextLevel = currentLevel === desiredLevel ? 0 : desiredLevel;
-    } else {
-      // Boton ciclico (estado inicial -> minimo -> completo -> inicial).
-      nextLevel = currentLevel === 0 ? 1 : currentLevel === 1 ? 2 : 0;
-    }
+    // Boton directo: elige el nivel; tocar el activo lo desmarca.
+    const desiredLevel = Number(button.dataset.level);
+    const nextLevel = currentLevel === desiredLevel ? 0 : desiredLevel;
 
     session.daysData = saveTodayLevel(session.daysData, habitId, nextLevel, habit);
     session.levelsByHabit = getTodayLevels(session.daysData);

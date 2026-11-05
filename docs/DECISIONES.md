@@ -398,7 +398,8 @@ M1–M7 (specs de cada mini-bloque en esta sección):
   editable y validado (mínimo = lo ya enviado, tope 30.000) desde P1.
 - **Limpieza de código para más adelante**: ~~imports sin uso en `app.js`~~ y
   ~~`saveTodayLevel` modifica `daysData` por referencia~~ — **resuelto en auditoría M1**;
-  **estilo cíclico sin uso** (botón único
-  Empezar/Minimo/Completo reemplazado por los botones directos el 2026-10-29 — conservado
-  como fallback) y texto `habitStart` ("Empezar") en texts.json ya no se muestra.
+  ~~estilo cíclico sin uso~~ — **eliminado en P5c** (botón único Empezar/Minimo/Completo
+  reemplazado por los botones directos el 2026-10-29; ya no hay fallback: `data.test.js`
+  exige `style ∈ {direct, number}`) junto con los textos huérfanos `habitStart`
+  ("Empezar"), `tagline` y `welcome` de texts.json.
 - **Los nombres de las ciudades están dibujados en la imagen del mapa y son definitivos.**

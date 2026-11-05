@@ -3,12 +3,9 @@
   "characterName": "Personaje",
   "goalName": "Nombre de la meta",
   "texts": {
-    "tagline": "Tu aventura diaria",
-    "welcome": "Bienvenido, aventurero",
     "habitsTitle": "Hoy",
     "pointsLabel": "Puntos de hoy",
     "balanceLabel": "Disponible",
-    "habitStart": "Empezar",
     "habitMin": "Minimo",
     "habitComplete": "Completo",
     "exportLabel": "Exportar",

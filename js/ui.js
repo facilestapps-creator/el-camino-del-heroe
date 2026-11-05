@@ -1,4 +1,5 @@
 import { textOf } from './text.js';
+import { getLevelValue } from './habits.js';
 
 export function renderAppName(name) {
   const element = document.getElementById('app-name');
@@ -34,7 +35,7 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
 
   for (const habit of habits) {
     const entry = levelsByHabit?.[habit.id];
-    const level = getLevelOf(entry);
+    const level = getLevelValue(entry);
     // M3: un hábito ya enviado (sentPoints > 0) queda bloqueado el día.
     // M1 (arreglo de pasos): el campo de pasos NUNCA se bloquea — la regla
     // sigue para los hábitos por niveles.
@@ -42,10 +43,7 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
       && typeof entry === 'object' && entry !== null && (entry.sentPoints ?? 0) > 0;
 
     const row = document.createElement('div');
-    row.className = habit.style === 'direct' ? 'habit habit-direct' : 'habit';
-    if (habit.style === 'number') {
-      row.className = 'habit habit-number';
-    }
+    row.className = habit.style === 'number' ? 'habit habit-number' : 'habit habit-direct';
     if (locked) {
       row.classList.add('locked');
     }
@@ -75,14 +73,10 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
       input.inputMode = 'numeric';
       input.dataset.stepsHabit = habit.id;
       input.value = String(typeof entry?.steps === 'number' ? entry.steps : 0);
-      input.disabled = locked;
 
       row.appendChild(info);
       row.appendChild(input);
       container.appendChild(row);
-      if (locked) {
-        row.appendChild(lockedTag(texts));
-      }
       continue;
     }
 
@@ -126,32 +120,6 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
       }
       continue;
     }
-
-    // Bloque A: minDesc y fullDesc siempre visibles a la vez.
-    const descMin = document.createElement('span');
-    descMin.className = 'habit-desc';
-    descMin.textContent = habit.minDesc;
-
-    const descFull = document.createElement('span');
-    descFull.className = 'habit-desc habit-desc-full';
-    descFull.textContent = habit.fullDesc;
-
-    info.appendChild(descMin);
-    info.appendChild(descFull);
-
-    const button = document.createElement('button');
-    button.className = `habit-btn state-${level}`;
-    button.type = 'button';
-    button.dataset.habitId = habit.id;
-    button.disabled = locked;
-    button.textContent = level === 0 ? texts.habitStart : level === 1 ? texts.habitMin : texts.habitComplete;
-
-    row.appendChild(info);
-    row.appendChild(button);
-    container.appendChild(row);
-    if (locked) {
-      row.appendChild(lockedTag(texts));
-    }
   }
 }
 
@@ -188,12 +156,7 @@ export function clearStepsError(habitId) {
 }
 
 // Acepta formato viejo (numero) y formato nuevo ({ level, points }).
-function getLevelOf(entry) {
-  if (typeof entry === 'object' && entry !== null) {
-    return entry.level ?? 0;
-  }
-  return typeof entry === 'number' ? entry : 0;
-}
+// (getLevelValue viene de habits.js — 5c: no duplicar la lógica.)
 
 // M3: "Puntos de hoy" muestra enviados + pendientes (los pendientes se
 // distinguen visualmente con su propia clase).
