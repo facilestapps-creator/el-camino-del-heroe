@@ -182,6 +182,8 @@ Un dato vive en un solo archivo, y cada módulo tiene una responsabilidad:
 - `tests/`: prueba de entrada corrupta en `getHabitsData()` + alta de `customHabitsFlow` en `imports.test.js`. **63/63 pruebas verdes.**
 - **Smoke en navegador (clics reales)**: crear 3 → cuarto bloqueado con aviso → editar `custom-2` (las descripciones nuevas aparecen en la fila); archivar `custom-3` con 3 pendientes → saldo 0 → 3 y fijos sin bloquear, con el form de edición cerrado; archivar `custom-2` con puntos ya enviados → saldo idéntico (6 → 6) y fijos sin bloquear. Consola sin errores ni warnings antes y después de recargar; datos del usuario restaurados byte a byte (quedó solo su `habitQuest:world:v1` original).
 
+- **Corrección de visibilidad (2026-11-19)**: `.custom-form` tiene `display: flex`, que le ganaba al atributo `hidden` y dejaba el form abierto al cargar. Se agregaron reglas específicas `.add-habit-btn[hidden]`, `.custom-notice[hidden]`, `.custom-form[hidden]`, `.custom-error[hidden]` y `.custom-actions[hidden]` → `display: none` (mismo patrón que `.confirm-overlay[hidden]`), sin regla global. `addHabitLabel` pasó a «Nuevo hábito». Smoke: estado inicial oculto/visible, abrir → Cancelar/Guardar, tope 3 con aviso; consola limpia; datos restaurados byte a byte.
+
 ## ⚙️ Bloques de ajuste (decididos — antes de la Fase 2)
 
 ### Bloque A — Datos y lógica  ✓ (implementado y probado el 2026-10-29)
