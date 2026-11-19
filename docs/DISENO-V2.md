@@ -39,12 +39,12 @@ Estado: decisiones cerradas por el dueño del proyecto. Este documento es la fue
 - Puntos fijos: mínimo = 1, completo = 3. No se le explica ni se le pide al usuario.
 - Al crear se pide: **nombre**, **esfuerzo mínimo** (texto) y **esfuerzo completo** (texto). Los dos textos son las descripciones del botón.
 - Límites de texto: nombre hasta 30 caracteres, descripciones hasta 40. No se aceptan vacíos.
-- Máximo **3 hábitos propios activos**.
+- Máximo **3 lugares ocupados**: cuentan los activos **más** los archivados hoy. Un archivado libera su lugar el día siguiente. Motivo: evitar crear → marcar → archivar en bucle para sumar puntos.
 - Se pueden editar (nombre y descripciones).
-- "Borrar" **archiva**: el hábito deja de mostrarse pero el historial se conserva. Los archivados no cuentan para el tope de 3.
+- "Borrar" **archiva**: el hábito deja de mostrarse pero el historial se conserva. **Al archivar, los pendientes del día se envían** (pasan a `sentPoints`, igual que los pendientes de días anteriores al cambiar de fecha), así no se pierden puntos. Se guarda `archivedDate` con la fecha local `YYYY-MM-DD` del archivado; el lugar se libera cuando `archivedDate` es anterior al día de hoy.
 - Viven solo en el navegador: clave `habitQuest:customHabits:v1`. No se toca `data/habits.json`.
-- Forma de cada hábito: `{ id: "custom-<n>", label, minDesc, fullDesc, minPoints: 1, fullPoints: 3, style: "direct", archived: false }`.
-- Deben entrar en el respaldo (por el prefijo) y la validación al importar debe aceptar y verificar esta clave: lista de hasta 3 activos, textos string, puntos 1 y 3.
+- Forma de cada hábito: `{ id: "custom-<n>", label, minDesc, fullDesc, minPoints: 1, fullPoints: 3, style: "direct", archived: false, archivedDate: null }` (`archivedDate`: `null` si está activo; `YYYY-MM-DD` al archivar).
+- Deben entrar en el respaldo (por el prefijo) y la validación al importar debe aceptar y verificar esta clave: lista con hasta **3 ocupantes del día** (activos + archivados hoy; los archivados en días anteriores no cuentan), textos string, puntos 1 y 3, `archived` boolean y `archivedDate` null o string `YYYY-MM-DD`.
 - **Verificar antes de implementar** cómo guarda el historial cada día (si es por id de hábito) para que archivar no deje datos huérfanos.
 
 **Fuera de alcance:** cambiar puntos, hábitos tipo "pasos", reordenar hábitos, más de 3.
@@ -81,7 +81,7 @@ Estado: decisiones cerradas por el dueño del proyecto. Este documento es la fue
 - `offer`: `{ "cityId": "...", "itemIds": ["..."] }` o `null`. Es lo que se ofreció en la estadía actual.
 
 ### Reglas de juego
-1. **Explorar** ciudad cuesta lo mismo que hoy (10 puntos) y genera la oferta de esa estadía: de **1 a 3 piezas** al azar (siempre al menos una).
+1. **Explorar** ciudad cuesta el **costo actual de explorar** (`explorationCost × travelCostMultiplier` = 40 en pantalla, sin cambios) y genera la oferta de esa estadía: de **1 a 3 piezas** al azar (siempre al menos una).
 2. La "bolsa general" son todas las piezas del catálogo que **no** están puestas ni en la oferta actual. Las ofertas salen de ahí.
 3. Volver a explorar en la misma ciudad (misma estadía) muestra **la misma oferta, sin cobrar de nuevo**. El botón pasa a "Ver objetos".
 4. El usuario elige una pieza de la oferta y se la pone. Si ese casillero estaba ocupado, la pieza anterior vuelve a la bolsa general. La pieza elegida sale de la oferta.
