@@ -12,6 +12,7 @@ const LOGIC_MODULES = [
   'journey',
   'habits',
   'customHabits',
+  'character',
   'world',
   'backup',
   'ui',

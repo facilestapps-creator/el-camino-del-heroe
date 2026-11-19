@@ -184,6 +184,17 @@ Un dato vive en un solo archivo, y cada módulo tiene una responsabilidad:
 
 - **Corrección de visibilidad (2026-11-19)**: `.custom-form` tiene `display: flex`, que le ganaba al atributo `hidden` y dejaba el form abierto al cargar. Se agregaron reglas específicas `.add-habit-btn[hidden]`, `.custom-notice[hidden]`, `.custom-form[hidden]`, `.custom-error[hidden]` y `.custom-actions[hidden]` → `display: none` (mismo patrón que `.confirm-overlay[hidden]`), sin regla global. `addHabitLabel` pasó a «Nuevo hábito». Smoke: estado inicial oculto/visible, abrir → Cancelar/Guardar, tope 3 con aviso; consola limpia; datos restaurados byte a byte.
 
+## 🔲 Pieza 4 — Personaje: catálogo, estado y reglas (V2, 2026-11-19)
+
+- `data/items.json` (nuevo): 6 casilleros (`casco`, `armadura`, `brazaletes`, `hombreras`, `pantalones`, `calzado`) y 12 piezas de ejemplo (`casco-01`…`calzado-02`), nombre «Casco 1»… e `image: null`. Sin textos nuevos: esta pieza no tiene pantalla.
+- `js/character.js` (nuevo): puro (sin DOM, sin `fetch`, sin importar `storage.js`). Funciones `isValidCharacterState`, `getBag`, `generateOffer(state, catalog, cityId, rng = Math.random)`, `equipItem(state, catalog, itemId)` y `clearOffer(state)`. Devuelven estado nuevo, nunca mutan el de entrada. **Los mutadores NO guardan** (ajuste del usuario): las piezas 5/6 llaman a `saveCharacterState(state)` tras cada cambio.
+- Oferta: `1 + floor(rng() * min(3, bolsa.length))` piezas sin repetir (Fisher–Yates con el mismo `rng`); bolsa vacía → `itemIds: []`. **La bolsa se calcula como si `offer` fuera `null`** (ajuste del usuario): la oferta se reemplaza por completo, así las piezas de la oferta anterior pueden volver a salir (prueba incluida).
+- Equipar: el id debe estar en la oferta y en el catálogo; escribe `equipped[slot] = id` y saca el id de `offer.itemIds`. La pieza anterior del casillero vuelve a la bolsa de forma implícita. Los ids desconocidos se ignoran en los cálculos sin borrarlos del estado, para que reemplazar los ejemplos por piezas reales no rompa estados guardados.
+- `js/config.js`: `CHARACTER_KEY = 'habitQuest:character:v1'`. `js/storage.js` (único acceso a `localStorage`): `loadCharacterState()` devuelve `{ equipped: {}, offer: null }` si lo guardado no cumple la forma válida o no se puede leer, sin lanzar; `saveCharacterState(state)` persiste (ajuste del usuario: normalización incluida y probada).
+- `js/backup.js`: `isValidCharacterEntry` aplica `parseIfNeeded` a la clave `character` (ajuste del usuario) y valida **solo la forma** (equipped: string|null; offer: null o `{cityId: string, itemIds: string[]}`). Sin la clave → válido; malformada → inválido sin tocar datos (ids desconocidos son válidos).
+- `tests/character.test.js` (nuevo): azar inyectable con `rng = () => 0` (una pieza determinista), `() => 0.999999` (tres) y secuencia controlada; invariantes de bolsa/sin repetidos/tope; oferta anterior ignorada; equipar, limpiar, ids desconocidos y persistencia. Integridad del catálogo en `tests/data.test.js`, tres casos de respaldo en `tests/backup.test.js`, alta en `imports.test.js`. **79/79 pruebas verdes**; sin smoke de navegador (no hay pantalla).
+- `world.js`, `worldFlow.js`, UI y `texts.json` quedan intactos: enganchar la oferta a Explorar y pasar el `cityId` de la estadía es de la pieza 5.
+
 ## ⚙️ Bloques de ajuste (decididos — antes de la Fase 2)
 
 ### Bloque A — Datos y lógica  ✓ (implementado y probado el 2026-10-29)

@@ -56,6 +56,7 @@ habit-quest/
 │   └── styles.css
 ├── js/
 │   ├── app.js              (orquestador: session + refresh() = actualizar + dibujar)
+│   ├── character.js        (personaje: bolsa, oferta, equipar; puro, sin storage)
 │   ├── backup.js
 │   ├── backupFlow.js       (flujo de respaldo: exportar/importar + línea "último respaldo")
 │   ├── config.js           (claves, versiones y STORAGE_PREFIX)
@@ -75,6 +76,7 @@ habit-quest/
 ├── data/
 │   ├── texts.json
 │   ├── habits.json
+│   ├── items.json          (catálogo del personaje: 6 casilleros + 12 piezas)
 │   ├── journey.json
 │   ├── stories.json
 │   ├── world.json
@@ -87,6 +89,7 @@ habit-quest/
 │   ├── imports.test.js     (todos los módulos salvo app.js importan sin error en Node)
 │   ├── habits.test.js
 │   ├── customHabits.test.js (lógica de hábitos propios y entradas corruptas)
+│   ├── character.test.js   (bolsa, oferta con rng inyectable, equipar, persistencia)
 │   ├── mapZoom.test.js
 │   ├── world.test.js
 │   ├── backup.test.js

@@ -1,4 +1,5 @@
-import { DATA_KEY, SCHEMA_VERSION, CUSTOM_HABITS_KEY } from './config.js';
+import { DATA_KEY, SCHEMA_VERSION, CUSTOM_HABITS_KEY, CHARACTER_KEY } from './config.js';
+import { isValidCharacterState } from './character.js';
 
 // Capa de persistencia: ÚNICO módulo que toca `localStorage`.
 
@@ -31,6 +32,17 @@ export function loadCustomHabits() {
 
 export function saveCustomHabits(customs) {
   saveToStorage(CUSTOM_HABITS_KEY, customs);
+}
+
+// Personaje: si lo guardado no cumple la forma válida (o no se puede leer),
+// se devuelve un estado vacío en vez de lanzar o propagar datos corruptos.
+export function loadCharacterState() {
+  const parsed = loadFromStorage(CHARACTER_KEY, null);
+  return isValidCharacterState(parsed) ? parsed : { equipped: {}, offer: null };
+}
+
+export function saveCharacterState(state) {
+  saveToStorage(CHARACTER_KEY, state);
 }
 
 export function loadFromStorage(key, fallbackValue) {

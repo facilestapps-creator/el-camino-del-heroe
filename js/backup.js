@@ -6,9 +6,11 @@ import {
   DATA_KEY,
   WORLD_KEY,
   CUSTOM_HABITS_KEY,
+  CHARACTER_KEY,
 } from './config.js';
 import { getTodayKey } from './habits.js';
 import { isValidCustomHabitsList } from './customHabits.js';
+import { isValidCharacterState } from './character.js';
 import { loadFromStorage, saveToStorage, collectByPrefix, replaceByPrefix } from './storage.js';
 
 // Respaldo: exportar/importar. meta:v1 ({ lastBackupAt }) se guarda ANTES de
@@ -81,11 +83,12 @@ export function parseBackupText(text) {
 
 // Respaldo válido = JSON con fecha de exportación, versión del esquema y
 // datos con al menos una clave "habitQuest:".
-// Además, SI el archivo trae data:v1 / world:v1 / customHabits:v1, deben
-// cumplir su esquema (days con entradas de los esquemas 1/2/3; world con
-// spent, currentCity, visited y explored; customHabits con hasta 3
-// ocupantes del día y archivedDate null o YYYY-MM-DD). Si no → inválido,
-// sin tocar datos. Un respaldo sin customHabits sigue siendo válido.
+// Además, SI el archivo trae data:v1 / world:v1 / customHabits:v1 /
+// character:v1, deben cumplir su esquema (days con entradas de los esquemas
+// 1/2/3; world con spent, currentCity, visited y explored; customHabits con
+// hasta 3 ocupantes del día y archivedDate null o YYYY-MM-DD; character con
+// equipped string|null y offer null o {cityId, itemIds}). Si no → inválido,
+// sin tocar datos. Un respaldo sin esas claves sigue siendo válido.
 export function isValidBackup(backup) {
   if (typeof backup !== 'object' || backup === null || Array.isArray(backup)) {
     return false;
@@ -104,7 +107,8 @@ export function isValidBackup(backup) {
   }
   return isValidDataEntry(backup.data[DATA_KEY])
     && isValidWorldEntry(backup.data[WORLD_KEY])
-    && isValidCustomEntry(backup.data[CUSTOM_HABITS_KEY]);
+    && isValidCustomEntry(backup.data[CUSTOM_HABITS_KEY])
+    && isValidCharacterEntry(backup.data[CHARACTER_KEY]);
 }
 
 // data:v1 = { days: { <fecha>: { <hábito>: { level?, points?, sentPoints?, steps? } } } }
@@ -167,6 +171,15 @@ function isValidCustomEntry(entry) {
     return true; // respaldo viejo: la clave no existía
   }
   return isValidCustomHabitsList(parseIfNeeded(entry));
+}
+
+// character:v1 = { equipped: { <slot>: id|null }, offer: { cityId, itemIds }|null }.
+// Solo forma (sin consultar el catálogo): los ids desconocidos son válidos.
+function isValidCharacterEntry(entry) {
+  if (entry === undefined) {
+    return true; // respaldo viejo: la clave no existía
+  }
+  return isValidCharacterState(parseIfNeeded(entry));
 }
 
 // Algunos respaldos viejos guardan los valores como strings JSON.

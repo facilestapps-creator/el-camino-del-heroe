@@ -5,6 +5,8 @@ export const WORLD_KEY = 'habitQuest:world:v1';
 export const META_KEY = 'habitQuest:meta:v1';
 // Hábitos propios del usuario (V2/Bloque 3). Entra al respaldo por el prefijo.
 export const CUSTOM_HABITS_KEY = 'habitQuest:customHabits:v1';
+// Personaje (V2/Bloque 1): catálogo puesto + oferta de la estadía actual.
+export const CHARACTER_KEY = 'habitQuest:character:v1';
 export const BACKUP_FILE_PREFIX = 'habit-quest-backup';
 // Umbral (días) a partir del cual "Último respaldo" se resalta como viejo.
 export const BACKUP_STALE_DAYS = 7;

@@ -4,7 +4,23 @@ import assert from 'node:assert/strict';
 import { resetLocalStorage } from './helpers/localStorage.js';
 import { isValidBackup, daysSinceBackup } from '../js/backup.js';
 import { replaceByPrefix } from '../js/storage.js';
-import { STORAGE_PREFIX, CUSTOM_HABITS_KEY, DATA_KEY } from '../js/config.js';
+import { STORAGE_PREFIX, CUSTOM_HABITS_KEY, CHARACTER_KEY, DATA_KEY } from '../js/config.js';
+
+function characterValido() {
+  return {
+    equipped: { casco: 'casco-01', armadura: null },
+    offer: { cityId: 'arvandill', itemIds: ['brazaletes-01'] },
+  };
+}
+
+function storageSnapshot() {
+  const out = {};
+  for (let i = 0; i < localStorage.length; i += 1) {
+    const key = localStorage.key(i);
+    out[key] = localStorage.getItem(key);
+  }
+  return out;
+}
 
 beforeEach(() => {
   resetLocalStorage();
@@ -113,6 +129,43 @@ test('isValidBackup: customHabits malformado → inválido', () => {
     backup.data[CUSTOM_HABITS_KEY] = bad;
     assert.equal(isValidBackup(backup), false);
   }
+});
+
+test('isValidBackup: respaldo viejo sin character sigue siendo válido', () => {
+  assert.equal(isValidBackup(backupValido()), true);
+  assert.equal(CHARACTER_KEY in backupValido().data, false);
+});
+
+test('isValidBackup: character válido (objeto y string JSON) → válido', () => {
+  const backup = backupValido();
+  backup.data[CHARACTER_KEY] = characterValido();
+  assert.equal(isValidBackup(backup), true);
+
+  const asString = backupValido();
+  asString.data[CHARACTER_KEY] = JSON.stringify(characterValido());
+  assert.equal(isValidBackup(asString), true);
+});
+
+test('isValidBackup: character malformado → inválido sin tocar datos', () => {
+  const malformed = [
+    'basura',
+    [],
+    { equipped: [], offer: null },
+    { equipped: { casco: 3 }, offer: null },
+    { equipped: {}, offer: { itemIds: ['casco-01'] } },
+    { equipped: {}, offer: { cityId: 'arvandill', itemIds: 'casco-01' } },
+    { equipped: {}, offer: { cityId: 'arvandill', itemIds: [3] } },
+  ];
+  localStorage.setItem(CHARACTER_KEY, JSON.stringify(characterValido()));
+  localStorage.setItem(DATA_KEY, JSON.stringify({ days: { intacto: {} } }));
+  const before = storageSnapshot();
+
+  for (const bad of malformed) {
+    const backup = backupValido();
+    backup.data[CHARACTER_KEY] = bad;
+    assert.equal(isValidBackup(backup), false, `debió rechazarse: ${JSON.stringify(bad)}`);
+  }
+  assert.deepEqual(storageSnapshot(), before);
 });
 
 test('daysSinceBackup: sin dato = null', () => {

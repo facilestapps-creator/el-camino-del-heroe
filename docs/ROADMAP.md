@@ -236,6 +236,13 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
 - `getHabitsData()` filtra entradas no objeto antes de leer `.archived`. Código nuevo solo con `textContent`; sin tocar los `innerHTML = ''` existentes.
 - **Probado en navegador con clics reales**: 3 altas, cuarto bloqueado, edición con descs visibles, archivado con pendientes (saldo 0→3) y con puntos ya enviados (saldo 6→6), fijos nunca bloqueados, form cerrado al archivar lo que se editaba, consola limpia y datos restaurados byte a byte. `npm test` → **63/63** en verde. Commit local, sin push (el usuario publica al cerrar el bloque).
 
+### Pieza 4 — Personaje: catálogo, estado y reglas ✓ (2026-11-19, V2)
+
+- `data/items.json` (nuevo): 6 casilleros y 12 piezas de ejemplo con `image: null`; integridad verificada en `tests/data.test.js`.
+- `js/character.js` (nuevo, puro): bolsa, oferta de 1–3 con `rng` inyectable, equipar con reemplazo de casillero, limpiar oferta e ids desconocidos ignorados. `js/config.js` + `js/storage.js`: clave `habitQuest:character:v1`, carga normalizada y guardado. `js/backup.js`: validación de forma con `parseIfNeeded`.
+- Mutadores sin guardar: las piezas 5/6 guardan con `saveCharacterState`. Sin pantalla ni textos nuevos; no se tocó `world.js`, `worldFlow.js` ni la UI.
+- **Probado**: `npm test` → **79/79** en verde, incluidos azar determinista, invariantes de la oferta, oferta anterior reutilizable, equipar/limpiar, ids desconocidos, normalización de storage y respaldo válido/sin clave/malformado. Commit local, sin push.
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

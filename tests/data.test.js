@@ -1,5 +1,5 @@
 // M5 — Integridad de los datos que el usuario edita a mano
-// (world.json, stories.json, habits.json).
+// (world.json, stories.json, habits.json, items.json).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -10,6 +10,7 @@ const readJSON = (name) => JSON.parse(
 const world = readJSON('world');
 const stories = readJSON('stories');
 const habitsData = readJSON('habits');
+const itemsData = readJSON('items');
 
 test('ids de ciudad únicos', () => {
   const ids = world.cities.map((c) => c.id);
@@ -73,6 +74,30 @@ test('cada ciudad tiene texto en stories.json', () => {
       typeof text === 'string' && text !== '',
       `falta la historia de la ciudad "${c.id}" en stories.json`,
     );
+  }
+});
+
+test('catálogo de personaje: cada pieza apunta a un casillero existente y los ids no se repiten', () => {
+  const slotIds = new Set(itemsData.slots.map((slot) => slot.id));
+  assert.equal(itemsData.slots.length, 6);
+  assert.equal(slotIds.size, 6);
+  assert.equal(itemsData.items.length, 12);
+  const ids = itemsData.items.map((item) => item.id);
+  assert.equal(new Set(ids).size, ids.length);
+  for (const item of itemsData.items) {
+    assert.ok(slotIds.has(item.slot), `pieza ${item.id}: casillero desconocido "${item.slot}"`);
+  }
+});
+
+test('catálogo de personaje: 2 piezas por casillero, con nombre y sin imagen', () => {
+  for (const slot of itemsData.slots) {
+    const pieces = itemsData.items.filter((item) => item.slot === slot.id);
+    assert.equal(pieces.length, 2, `casillero ${slot.id}: se esperaban 2 piezas`);
+  }
+  for (const item of itemsData.items) {
+    assert.equal(typeof item.name, 'string');
+    assert.ok(item.name !== '');
+    assert.equal(item.image, null, `pieza ${item.id}: los ejemplos no traen imagen`);
   }
 });
 
