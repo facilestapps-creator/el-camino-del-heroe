@@ -216,6 +216,12 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
   viejo): filas con costos nuevos, "Starkrock 188 · ¡Dragones!", diálogos,
   **consola limpia**; el viaje a mitad de camino del usuario restaurado byte a byte.
 
+### Pieza 1 — Zoom del mapa ✓ (2026-11-19, V2)
+
+- `index.html`: `#map-zoom` dentro de `.map-wrap`; `css/styles.css`: `transform-origin` al centro y `touch-action: pan-y` inicial.
+- `js/mapZoom.js` (nuevo): pellizco 1x–2,5x, pan con clamp a bordes, doble toque a 1x, `touch-action` dinámico y marcador con escala inversa. Sin persistencia ni textos nuevos. `js/app.js` lo inicializa una vez; `tests/mapZoom.test.js` + `imports.test.js`.
+- **Probado en navegador**: 1x `pan-y`/escala 1 → pellizco 2,5x `none`/marcador 0,4 → doble toque vuelve a 1x → 2x + pan → `refresh()` (tap de hábito + Enviar) con transform, `touch-action` y marcador idénticos; marcador 16×16 px y centro a 0 px del punto esperado; consola limpia; datos del usuario restaurados byte a byte. 48/48 pruebas verdes.
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

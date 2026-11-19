@@ -32,6 +32,7 @@ corre como prueba). Cubren solo lógica (habits, world, backup y
 
 - **Estado actual, problemas conocidos y plan**: [`docs/overview.md`](docs/overview.md)
   (se lee primero en cada sesión).
+- **Diseño V2** (zoom del mapa, hábitos propios y Personaje): [`docs/DISENO-V2.md`](docs/DISENO-V2.md).
 - `tools/waypoints.html`: herramienta para trazar rutas sobre el mapa (clics con zoom/pan,
   devuelve el JSON de waypoints para pegar en `world.json`).
 
@@ -67,7 +68,8 @@ habit-quest/
 │   ├── ui.js
 │   ├── world.js
 │   ├── worldFlow.js        (flujo del mundo: destino, viaje, dragón, explorar)
-│   └── worldUI.js
+│   ├── worldUI.js
+│   └── mapZoom.js          (zoom del mapa: pellizco, pan, doble toque)
 ├── data/
 │   ├── texts.json
 │   ├── habits.json

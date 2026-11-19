@@ -40,6 +40,7 @@ import {
 import { setupHabitsFlow } from './habitsFlow.js';
 import { createWorldFlow } from './worldFlow.js';
 import { renderLastBackupLine, setupBackupFlow } from './backupFlow.js';
+import { setupMapZoom } from './mapZoom.js';
 
 async function main() {
   const texts = await loadJSON('texts');
@@ -136,6 +137,7 @@ async function main() {
 
   renderViewToggle(textOf(textsBag, 'habitsTitle'), worldTexts.worldTitle);
   showView(currentView);
+  setupMapZoom();
   refresh();
 
   document.getElementById('view-hoy-btn').addEventListener('click', () => {

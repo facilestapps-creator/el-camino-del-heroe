@@ -380,10 +380,18 @@ body {
   background: #1e293b;
 }
 
+.map-zoom {
+  position: relative;
+  transform-origin: 50% 50%;
+  touch-action: pan-y;
+  user-select: none;
+}
+
 #world-map-img {
   display: block;
   width: 100%;
   height: auto;
+  -webkit-user-drag: none;
 }
 
 .map-marker {

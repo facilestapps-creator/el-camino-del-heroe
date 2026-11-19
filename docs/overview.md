@@ -2,7 +2,7 @@
 
 > Se lee PRIMERO en cada sesión (después del README) y se actualiza al terminar cada prompt.
 > Máximo ~100 líneas: si crece, se resume. Sin datos personales del usuario (el repo es público).
-> Última actualización: 2026-11-05 · P1–P6 ✓ y A ✓ (commits y detalle en Historial).
+> Última actualización: 2026-11-19 · P1–P6 ✓, A ✓ y V2 Pieza 1 ✓ (commits y detalle en Historial).
 
 ## Qué es
 App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene nivel mínimo o completo; los puntos ganados se gastan para viajar y explorar un mapa de fantasía. Un solo usuario, sin cuentas ni servidor. Título provisorio: "El camino del héroe" (carpeta/paquete: habit-quest).
@@ -36,6 +36,8 @@ App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene
 ## Estado (2026-11-05, tras P6)
 **Hecho:** Fase 0–2 (hábitos, enviar, mundo, viaje, dragones, explorar), respaldo, mapa recortado, trazador de caminos, 9 rutas, publicación en GitHub Pages, app instalable, P1 pasos (validación mín/tope), P2 `.gitignore` + reglas de git, P3 documentación (overview reemplaza a MEMORIA), P4 pruebas automáticas de la lógica (37 en `tests/`, cero dependencias), **P5 refactor** (capas: storage/dataFiles, app.js = orquestador con `refresh()` y flujos separados, código muerto eliminado, textos con variables en `data/` — ver DECISIONES «Capas del código»), **P6 costos de ruta** (points = `round(largo_px ÷ 13,6)` derivado de los waypoints al cargar; `imageSize` y `pxPerPoint` en `world.json`; total 282; el marcador avanza a velocidad pareja en todas las rutas), **A limpieza rápida** (test portable, respaldo aislado por prefijo, costos con fallo fuerte, CSS y comentarios limpios; 44 pruebas).
 
+**V2 (2026-11-19, spec en `docs/DISENO-V2.md`):** pieza 1 ✓ Zoom del mapa (pellizco 1–2,5x, pan con clamp, doble toque, `touch-action` dinámico, marcador compensado). Sin push: el usuario publica al cerrar cada bloque. Siguiente: pieza 2 (hábitos propios, lógica y datos).
+
 **Problemas conocidos (prompt B, pendiente hasta después de una semana de uso real):**
 1. **Persistencia dentro de la lógica**: `habits.js` llama `saveDays` en 4 funciones (`saveTodayLevel`, `saveSteps`, `sendDay`, `migrateDaysData`). Además `session.levelsByHabit` se sincroniza a mano en 5 lugares y su nombre engaña (guarda entradas completas, no niveles; `getTodayLevels` igual).
 2. **Formato viejo repetido**: `typeof x === 'object' && x !== null` aparece 9 veces (habits 7, backup 1, ui 1) más funciones de compatibilidad que ya no se ejecutan (`getLevelValue` numérico, fallbacks en `computeDayPoints` y `computeTotalSent`). Constantes 700 y 30000 duplicadas como valor de reserva en app.js (ya están en habits.json) y 2500/5000 en la migración.
@@ -54,6 +56,12 @@ App web personal para llevar hábitos con mecánica de juego. Cada hábito tiene
 8. [ ] **Semana de uso real (usuario)**: usar la app una semana antes de tocar estructura.
 9. [ ] **B: estructura y textos (después de la semana)**: resolver la lista de "Problemas conocidos".
 10. [ ] Después: historial · hitos (`journey.json`, diferido) · perseguidor (último). Sin planificar: tienda.
+11. [x] **V2 Pieza 1 — Zoom del mapa**. ✓ (2026-11-19 — `js/mapZoom.js`, 48 pruebas, smoke en navegador con `refresh()` con zoom activo)
+12. [ ] V2 Pieza 2 — Hábitos propios: lógica y datos (clave `customHabits`, tope por día, archivado con auto-envío, validación de respaldo, pruebas).
+13. [ ] V2 Pieza 3 — Hábitos propios: pantalla.
+14. [ ] V2 Pieza 4 — Personaje: catálogo, estado y reglas.
+15. [ ] V2 Pieza 5 — Explorar muestra piezas.
+16. [ ] V2 Pieza 6 — Pestaña Personaje.
 
 Descartado por ahora: separar la app en `app/` (GitHub Pages desde rama publica solo la raíz).
 
@@ -65,4 +73,5 @@ Descartado por ahora: separar la app en `app/` (GitHub Pages desde rama publica 
 - 2026-11-04: corrección de docs de la auditoría: originales del mapa (no están en el repo; copias `.jpg` en `~/Descargas/`), UI de carga manual de pasos ya hecha, bloqueo de niveles ≠ campo de pasos en Reglas, "app instalable" quitado de pendientes, costo unificado en 13,6 px/pt (RECETAS; medido sobre las 9 rutas: 3.827 px / 282 pts = 13,57).
 - 2026-11-04: **P5 refactor ✓ en 4 mini-bloques**: 5a (`f33d4ec`) localStorage solo en storage.js, fetch en dataFiles.js, prefijo en config · 5b (`52cd24b`) app.js = orquestador con `session` y `refresh() = updateState() + renderAll()`, flujos en habitsFlow/worldFlow/backupFlow · 5c (`7e86aba`) rama cíclica, lockedTag/disabled inalcanzables, getLevelOf duplicado y textos huérfanos eliminados (test de estilos nuevos) · 5d (`b1b4bb6`) 14 plantillas `{var}` en `data/` + `fillText` (verificado: claves completas y 16/16 strings idénticos). 35 pruebas en verde. **Smoke 5d en navegador ✓** (2026-11-05): todos los textos con variables verificados en pantalla (Estás en/Viajando/Faltan/Llegaste/Entrar/Explorar · 40/dos caminos/212 · ¡Dragones!/Enviar (N)/+N pendientes/Disponible/700 pasos) + diálogos (2 opciones, sin saldo, cancelar con reembolso) + consola sin errores ni warnings; datos del usuario restaurados tras el smoke. Cierre: push único de los 5 commits.
 - 2026-11-05: **P6 costos de ruta ✓**: los 9 routes perdieron el `points` manual; al cargar, `hydrateRouteCosts` calcula `points = round(largo_px ÷ 13,6)` desde los waypoints con `imageSize` (963×1121) y `pxPerPoint` (13,6) ahora en `world.json`; **Σ = 282 exacto** (3.827 px medidos); el marcador pasa a la misma longitud en px (desaparece el 0,859 hardcodeado). Costos en pantalla (×4): Vornstead 68 · WGlades 140 · Dar'Hanok 160 · Bahía 76 (igual) · Bosque 116 · Starkrock 144 · dragón 188. 37/37 pruebas (2 nuevas); smoke en navegador en `127.0.0.1` (la caché de localhost servía world.json viejo): filas, dragón, diálogos y consola limpia; el viaje a mitad de camino del usuario restaurado byte a byte.
+- 2026-11-19: **V2 Pieza 1 zoom del mapa ✓**: `#map-zoom` + `js/mapZoom.js` (pellizco 1–2,5x con anclaje, pan con clamp, doble toque, `touch-action` pan-y/none, marcador `scale(1/z)`); setup único en app.js. 48/48 pruebas (4 nuevas + imports). Smoke: 1x→2,5x→1x→2x+pan, `refresh()` con zoom activo sin alterar transform ni marcador, marcador 16×16 y centro 0 px, consola limpia, datos restaurados. Commit local `Pendiente de crear`, sin push.
 - 2026-11-05: **A limpieza rápida ✓**: script de test portable (`node --test` sin argumentos, helpers no corren como prueba), `replaceByPrefix` escribe solo claves del juego (+3 pruebas), `hydrateRouteCosts` falla fuerte con Error si falta `imageSize`/`pxPerPoint` o la ruta nombra una ciudad inexistente (+4 pruebas), `.habit-desc`/`.habit-desc-full` eliminadas del CSS, ~54 comentarios de historial reescritos como porqué (grep de tags vacío) y "Problemas conocidos" = lista del prompt B. 44 pruebas verdes.

@@ -1,7 +1,7 @@
 # Decisiones de diseño — "El camino del héroe"
 
 Registro de las decisiones tomadas. Si algo cambia, se actualiza acá.
-Última actualización: 2026-11-04.
+Última actualización: 2026-11-19.
 
 ---
 
@@ -148,6 +148,14 @@ Un dato vive en un solo archivo, y cada módulo tiene una responsabilidad:
   `pendingCountLine`, `pendingLabelLine`, `locationText`, `travelText`, `progressText`,
   `arrivedText`, `enterText`, `exploreCostText`, `destViaText`, `destMetaText`,
   `dragonSuffix`). Cero concatenaciones de textos en el código.
+
+## 🔲 Pieza 1 — Zoom del mapa (V2, 2026-11-19)
+
+- `#map-zoom` es un contenedor interior de `.map-wrap`: recibe `translate(x,y) scale(z)` y lleva imagen + marcador, así las coordenadas en % siguen alineadas al agrandar. `transform-origin` al centro → el pan máximo por lado es `largo × (z − 1) / 2`.
+- `js/mapZoom.js` concentra los gestos con Pointer Events (estado local, no persistente, fuera de `refresh()`): pellizco 1x–2,5x con anclaje bajo los dedos, pan de un dedo solo con zoom > 1, doble toque → 1x.
+- `touch-action` dinámico pedido por el usuario: `pan-y` a 1x (sigue el scroll de la página sobre el mapa), `none` con zoom > 1.
+- Marcador con `translate(-50%, -50%) scale(1/z)`: compensa el tamaño visual sin mover su centro.
+- Sin rueda, sin botones +/− y sin recordar el zoom (fuera de alcance).
 
 ## ⚙️ Bloques de ajuste (decididos — antes de la Fase 2)
 

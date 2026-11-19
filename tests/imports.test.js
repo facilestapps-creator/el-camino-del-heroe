@@ -18,6 +18,7 @@ const LOGIC_MODULES = [
   'habitsFlow',
   'worldFlow',
   'backupFlow',
+  'mapZoom',
 ];
 
 test('todos los módulos (salvo app.js) importan sin error en Node', async () => {
