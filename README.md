@@ -59,6 +59,7 @@ habit-quest/
 │   ├── backup.js
 │   ├── backupFlow.js       (flujo de respaldo: exportar/importar + línea "último respaldo")
 │   ├── config.js           (claves, versiones y STORAGE_PREFIX)
+│   ├── customHabits.js     (hábitos propios: validar, crear/editar/archivar, tope 3)
 │   ├── dataFiles.js        (lectura de data/*.json — único módulo con fetch)
 │   ├── habits.js
 │   ├── habitsFlow.js       (flujo de hábitos: tap por nivel, pasos, Enviar)

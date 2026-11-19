@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { resetLocalStorage } from './helpers/localStorage.js';
 import { isValidBackup, daysSinceBackup } from '../js/backup.js';
 import { replaceByPrefix } from '../js/storage.js';
-import { STORAGE_PREFIX } from '../js/config.js';
+import { STORAGE_PREFIX, CUSTOM_HABITS_KEY, DATA_KEY } from '../js/config.js';
 
 beforeEach(() => {
   resetLocalStorage();
@@ -58,6 +58,61 @@ test('isValidBackup: world sin currentCity → inválido', () => {
   const backup = backupValido();
   delete backup.data['habitQuest:world:v1'].currentCity;
   assert.equal(isValidBackup(backup), false);
+});
+
+function customValido(id = 'custom-1', archivedDate = null) {
+  return {
+    id,
+    label: 'Leer',
+    minDesc: '5 minutos',
+    fullDesc: '20 minutos',
+    minPoints: 1,
+    fullPoints: 3,
+    style: 'direct',
+    archived: archivedDate !== null,
+    archivedDate,
+  };
+}
+
+test('isValidBackup: respaldo viejo sin customHabits sigue siendo válido', () => {
+  assert.equal(isValidBackup(backupValido()), true);
+  assert.equal(CUSTOM_HABITS_KEY in backupValido().data, false);
+});
+
+test('isValidBackup: customHabits válido (activo + archivado) → válido', () => {
+  const backup = backupValido();
+  backup.data[CUSTOM_HABITS_KEY] = [customValido(), customValido('custom-2', '2000-01-01')];
+  assert.equal(isValidBackup(backup), true);
+});
+
+test('isValidBackup: customHabits como string JSON también se acepta', () => {
+  const backup = backupValido();
+  backup.data[CUSTOM_HABITS_KEY] = JSON.stringify([customValido()]);
+  assert.equal(isValidBackup(backup), true);
+});
+
+test('isValidBackup: archivedDate con formato inválido → inválido sin tocar datos', () => {
+  const backup = backupValido();
+  backup.data[CUSTOM_HABITS_KEY] = [customValido('custom-1', '01/01/2000')];
+  localStorage.setItem(DATA_KEY, JSON.stringify({ days: { intacto: {} } }));
+  localStorage.setItem('habitQuest:world:v1', 'valor-viejo');
+  assert.equal(isValidBackup(backup), false);
+  assert.equal(localStorage.getItem(DATA_KEY), JSON.stringify({ days: { intacto: {} } }));
+  assert.equal(localStorage.getItem('habitQuest:world:v1'), 'valor-viejo');
+  assert.equal(localStorage.getItem(CUSTOM_HABITS_KEY), null);
+});
+
+test('isValidBackup: customHabits malformado → inválido', () => {
+  for (const bad of [
+    'no-es-lista',
+    [{ ...customValido(), fullPoints: 2 }],
+    [{ ...customValido() }, { ...customValido() }], // ids repetidos
+    [customValido(), customValido('custom-2'), customValido('custom-3'), customValido('custom-4')],
+  ]) {
+    const backup = backupValido();
+    backup.data[CUSTOM_HABITS_KEY] = bad;
+    assert.equal(isValidBackup(backup), false);
+  }
 });
 
 test('daysSinceBackup: sin dato = null', () => {

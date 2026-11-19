@@ -1,12 +1,15 @@
 import { SCHEMA_VERSION } from './config.js';
 import { loadJSON } from './dataFiles.js';
-import { saveDays } from './storage.js';
+import { saveDays, loadCustomHabits } from './storage.js';
 
 // Lógica de hábitos y cálculo de puntos (esquema v3: { level, points, sentPoints, steps }).
 
-// Devuelve habits.json completo: { stepsPerPoint, habits }.
+// Devuelve habits.json + los hábitos propios activos del usuario, en memoria.
+// data/habits.json nunca se escribe: los hábitos propios viven solo en storage.
 export async function getHabitsData() {
-  return loadJSON('habits');
+  const data = await loadJSON('habits');
+  const customs = loadCustomHabits().filter((habit) => !habit.archived);
+  return { ...data, habits: [...(data.habits ?? []), ...customs] };
 }
 
 export function getTodayKey() {
@@ -149,6 +152,25 @@ export function computeTotalSent(daysData) {
 export function sendTodayPoints(daysData) {
   const key = getTodayKey();
   return sendDay(daysData, key);
+}
+
+// Auto-envío PUNTUAL al archivar: solo el hábito indicado del día indicado.
+// No usa sendDay: eso enviaría también los pendientes de los hábitos fijos.
+export function sendHabitDayPoints(daysData, dayKey, habitId) {
+  const day = daysData?.days?.[dayKey];
+  const entry = day?.[habitId];
+  if (!entry || typeof entry !== 'object' || typeof entry.points !== 'number'
+    || (entry.sentPoints ?? 0) === entry.points) {
+    return daysData;
+  }
+  const nextDay = { ...day, [habitId]: { ...entry, sentPoints: entry.points } };
+  const next = {
+    ...daysData,
+    schemaVersion: SCHEMA_VERSION,
+    days: { ...daysData.days, [dayKey]: nextDay },
+  };
+  saveDays(next);
+  return next;
 }
 
 // Cambio de dia: los pendientes de DIAS ANTERIORES se envian solos.

@@ -157,6 +157,18 @@ Un dato vive en un solo archivo, y cada módulo tiene una responsabilidad:
 - Marcador con `translate(-50%, -50%) scale(1/z)`: compensa el tamaño visual sin mover su centro.
 - Sin rueda, sin botones +/− y sin recordar el zoom (fuera de alcance).
 
+## 🔲 Pieza 2 — Hábitos propios: lógica y datos (V2, 2026-11-19)
+
+- Clave `habitQuest:customHabits:v1` (`CUSTOM_HABITS_KEY`): entra al respaldo por el prefijo, sin tocar `data/habits.json`. `loadCustomHabits`/`saveCustomHabits` viven en `js/storage.js` (único módulo con `localStorage`).
+- `js/customHabits.js` (nuevo, sin DOM): valida nombre (1–30) y descripciones (1–40) recortando espacios; crear/editar/archivar; id `custom-<n>` **monotónico** (máximo usado + 1, incluidos archivados) para que un id nunca se reutilice y no mezcle historial. Editar solo cambia nombre y descripciones: puntos (1/3), estilo `direct` e id quedan fijos.
+- Tope de **3 ocupantes**: activos + archivados con `archivedDate === hoy`; un archivado con fecha anterior libera el lugar. Los mutadores guardan la lista (igual que `saveDays` en `habits.js`) para no dejar datos a medias.
+- `getHabitsData()` lee `data/habits.json` y le suma **en memoria** los hábitos propios activos (los archivados quedan fuera del listado, no del historial).
+- **Auto-envío puntual al archivar** (ajuste del usuario): `sendHabitDayPoints(daysData, dayKey, habitId)` pone `sentPoints = points` **solo** en `days[hoy][custom-n]`. No se usa `sendTodayPoints()` global: los hábitos fijos pendientes NO se bloquean, ni se tocan otros hábitos propios ni días anteriores. "Hoy" sale de `getTodayKey()`, la misma función que usa el historial.
+- **Los puntos de un hábito archivado hoy salen del contador "Puntos de hoy" pero NO del saldo**: `computeDayPoints` solo mira la lista de hábitos activos, así que el id archivado no aporta pendientes; sus `sentPoints` siguen en `days[fecha][id]` y `computeTotalSent` los sigue contando como disponibles.
+- `migrateDaysData`, `sendPastDays` y `computeDayPoints` iteran todas las entradas de `days`/no mutan su entrada: ninguno descarta ni altera un id que ya no está en la lista activa. Prueba de demostración en `tests/customHabits.test.js`.
+- Respaldo: si falta la clave, sigue siendo válido (respaldos viejos). Si está, debe ser una lista con hasta 3 ocupantes del día, textos string, puntos 1 y 3, `archived` boolean y `archivedDate` **null o `YYYY-MM-DD`** (mismo formato que las claves de `days`); cualquier otro valor se rechaza sin escribir nada. Valores serializados como string JSON también se aceptan.
+- Sin pantalla, sin textos nuevos y sin tocar `index.html`/CSS: la UI es la pieza 3.
+
 ## ⚙️ Bloques de ajuste (decididos — antes de la Fase 2)
 
 ### Bloque A — Datos y lógica  ✓ (implementado y probado el 2026-10-29)

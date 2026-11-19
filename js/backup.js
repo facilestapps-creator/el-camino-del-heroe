@@ -1,5 +1,14 @@
-import { SCHEMA_VERSION, BACKUP_FILE_PREFIX, META_KEY, STORAGE_PREFIX, DATA_KEY, WORLD_KEY } from './config.js';
+import {
+  SCHEMA_VERSION,
+  BACKUP_FILE_PREFIX,
+  META_KEY,
+  STORAGE_PREFIX,
+  DATA_KEY,
+  WORLD_KEY,
+  CUSTOM_HABITS_KEY,
+} from './config.js';
 import { getTodayKey } from './habits.js';
+import { isValidCustomHabitsList } from './customHabits.js';
 import { loadFromStorage, saveToStorage, collectByPrefix, replaceByPrefix } from './storage.js';
 
 // Respaldo: exportar/importar. meta:v1 ({ lastBackupAt }) se guarda ANTES de
@@ -72,9 +81,11 @@ export function parseBackupText(text) {
 
 // Respaldo válido = JSON con fecha de exportación, versión del esquema y
 // datos con al menos una clave "habitQuest:".
-// Además, SI el archivo trae data:v1 / world:v1, deben cumplir su
-// esquema (days con entradas de los esquemas 1/2/3; world con spent,
-// currentCity, visited y explored). Si no → inválido, sin tocar datos.
+// Además, SI el archivo trae data:v1 / world:v1 / customHabits:v1, deben
+// cumplir su esquema (days con entradas de los esquemas 1/2/3; world con
+// spent, currentCity, visited y explored; customHabits con hasta 3
+// ocupantes del día y archivedDate null o YYYY-MM-DD). Si no → inválido,
+// sin tocar datos. Un respaldo sin customHabits sigue siendo válido.
 export function isValidBackup(backup) {
   if (typeof backup !== 'object' || backup === null || Array.isArray(backup)) {
     return false;
@@ -91,7 +102,9 @@ export function isValidBackup(backup) {
   if (!Object.keys(backup.data).some((key) => key.startsWith(STORAGE_PREFIX))) {
     return false;
   }
-  return isValidDataEntry(backup.data[DATA_KEY]) && isValidWorldEntry(backup.data[WORLD_KEY]);
+  return isValidDataEntry(backup.data[DATA_KEY])
+    && isValidWorldEntry(backup.data[WORLD_KEY])
+    && isValidCustomEntry(backup.data[CUSTOM_HABITS_KEY]);
 }
 
 // data:v1 = { days: { <fecha>: { <hábito>: { level?, points?, sentPoints?, steps? } } } }
@@ -143,6 +156,17 @@ function isValidWorldEntry(entry) {
     return false;
   }
   return Array.isArray(world.visited) && Array.isArray(world.explored);
+}
+
+// customHabits:v1 = [ { id: 'custom-n', label, minDesc, fullDesc,
+// minPoints: 1, fullPoints: 3, style: 'direct', archived, archivedDate } ].
+// La validación de forma vive en customHabits.js (misma regla que la creación);
+// acá solo se parsea el valor y se comprueba que no haya más de 3 ocupantes hoy.
+function isValidCustomEntry(entry) {
+  if (entry === undefined) {
+    return true; // respaldo viejo: la clave no existía
+  }
+  return isValidCustomHabitsList(parseIfNeeded(entry));
 }
 
 // Algunos respaldos viejos guardan los valores como strings JSON.

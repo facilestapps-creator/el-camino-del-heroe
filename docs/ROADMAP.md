@@ -222,6 +222,13 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
 - `js/mapZoom.js` (nuevo): pellizco 1x–2,5x, pan con clamp a bordes, doble toque a 1x, `touch-action` dinámico y marcador con escala inversa. Sin persistencia ni textos nuevos. `js/app.js` lo inicializa una vez; `tests/mapZoom.test.js` + `imports.test.js`.
 - **Probado en navegador**: 1x `pan-y`/escala 1 → pellizco 2,5x `none`/marcador 0,4 → doble toque vuelve a 1x → 2x + pan → `refresh()` (tap de hábito + Enviar) con transform, `touch-action` y marcador idénticos; marcador 16×16 px y centro a 0 px del punto esperado; consola limpia; datos del usuario restaurados byte a byte. 48/48 pruebas verdes.
 
+### Pieza 2 — Hábitos propios: lógica y datos ✓ (2026-11-19, V2)
+
+- `js/config.js` (clave `CUSTOM_HABITS_KEY`), `js/storage.js` (`loadCustomHabits`/`saveCustomHabits`), `js/customHabits.js` (nuevo: validación, crear/editar/archivar, tope de 3, ids monotónicos, `isValidCustomHabitsList`).
+- `js/habits.js`: `getHabitsData()` suma los activos en memoria; `sendHabitDayPoints()` envía **solo** el hábito archivado de hoy (sin bloquear los fijos). `js/backup.js`: valida `customHabits` cuando la clave está presente (archivedDate null o `YYYY-MM-DD`), sin tocar datos si está mal.
+- Sin pantalla ni textos nuevos (eso es la pieza 3). `tests/customHabits.test.js` (9 pruebas nuevas), casos en `backup.test.js` y `imports.test.js`.
+- **Probado**: `npm test` → **62/62** en verde. Incluye prueba que demuestra que `migrateDaysData`, `sendPastDays` y `computeDayPoints` conservan entradas de ids archivados; que el auto-envío no bloquea `ejercicio` ni toca otros días; y que los puntos archivados siguen sumando al saldo (`computeTotalSent`) aunque salgan de "Puntos de hoy". Sin smoke de navegador: no hay UI en esta pieza.
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

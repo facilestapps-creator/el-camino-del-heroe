@@ -1,4 +1,4 @@
-import { DATA_KEY, SCHEMA_VERSION } from './config.js';
+import { DATA_KEY, SCHEMA_VERSION, CUSTOM_HABITS_KEY } from './config.js';
 
 // Capa de persistencia: ÚNICO módulo que toca `localStorage`.
 
@@ -21,6 +21,16 @@ export function loadDays() {
 
 export function saveDays(days) {
   localStorage.setItem(DATA_KEY, JSON.stringify(days));
+}
+
+// Hábitos propios: lista vacía si la clave no existe o no es una lista.
+export function loadCustomHabits() {
+  const parsed = loadFromStorage(CUSTOM_HABITS_KEY, []);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+export function saveCustomHabits(customs) {
+  saveToStorage(CUSTOM_HABITS_KEY, customs);
 }
 
 export function loadFromStorage(key, fallbackValue) {
