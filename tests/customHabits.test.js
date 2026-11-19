@@ -198,6 +198,25 @@ test('getHabitsData: agrega los activos y excluye los archivados sin escribir ha
   }
 });
 
+test('getHabitsData: una entrada corrupta en customHabits no impide arrancar', async () => {
+  const originalFetch = globalThis.fetch;
+  const raw = readFileSync(new URL('../data/habits.json', import.meta.url), 'utf8');
+  const fixedCount = JSON.parse(raw).habits.length;
+  localStorage.setItem(
+    CUSTOM_HABITS_KEY,
+    JSON.stringify([null, 'basura', 7, [], custom('custom-1')]),
+  );
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => JSON.parse(raw) });
+  try {
+    const data = await getHabitsData();
+    assert.equal(data.habits.length, fixedCount + 1);
+    assert.ok(data.habits.some((habit) => habit.id === 'custom-1'));
+    assert.ok(data.habits.every((habit) => typeof habit === 'object' && habit !== null));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('ids archivados: migrateDaysData, sendPastDays y computeDayPoints no los descartan ni alteran', () => {
   // custom-1 NO está en activeHabits (está archivado) pero sus entradas siguen en days.
   const v2 = {

@@ -11,7 +11,7 @@ import {
 import { showStepsError, clearStepsError } from './ui.js';
 import { textOf, fillText } from './text.js';
 
-export function setupHabitsFlow({ session, habits, stepsPerPoint, maxSteps, textsBag, refresh }) {
+export function setupHabitsFlow({ session, getHabits, stepsPerPoint, maxSteps, textsBag, refresh }) {
   const habitsList = document.getElementById('habits-list');
 
   habitsList.addEventListener('click', (event) => {
@@ -21,7 +21,7 @@ export function setupHabitsFlow({ session, habits, stepsPerPoint, maxSteps, text
     }
 
     const habitId = button.dataset.habitId;
-    const habit = habits.find((h) => h.id === habitId);
+    const habit = getHabits().find((h) => h.id === habitId);
     if (!habit) {
       return;
     }

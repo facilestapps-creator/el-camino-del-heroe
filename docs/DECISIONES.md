@@ -169,6 +169,19 @@ Un dato vive en un solo archivo, y cada módulo tiene una responsabilidad:
 - Respaldo: si falta la clave, sigue siendo válido (respaldos viejos). Si está, debe ser una lista con hasta 3 ocupantes del día, textos string, puntos 1 y 3, `archived` boolean y `archivedDate` **null o `YYYY-MM-DD`** (mismo formato que las claves de `days`); cualquier otro valor se rechaza sin escribir nada. Valores serializados como string JSON también se aceptan.
 - Sin pantalla, sin textos nuevos y sin tocar `index.html`/CSS: la UI es la pieza 3.
 
+## 🔲 Pieza 3 — Hábitos propios: pantalla (V2, 2026-11-19)
+
+- `index.html`: `#custom-controls` entre `#habits-list` y `#send-btn`, con `#add-habit-btn`, `#custom-notice` y el `<form id="custom-form">` **en línea**. Fuera de la lista para que `renderHabitList` (que vacía el contenedor) no destruya un formulario abierto.
+- `data/texts.json`: textos nuevos (botón, aviso de tope, títulos, etiquetas, Guardar, Editar, Archivar, errores de validación y plantilla de confirmación con `{label}`). Cancelar reutiliza `confirmCancelLabel`. **No se pide ni se muestra ningún valor de puntos**; cero strings nuevos en JS (`textOf`/`fillText` + `textContent`).
+- `js/ui.js`: `renderHabitList(..., customIds)` agrega Editar/Archivar solo a las filas cuyo id está en el `Set`; cada botón toma el id de `.dataset.habitId` de la fila, así no se agrega ningún campo al dato. Funciones nuevas: `renderCustomControls`, `renderCustomFormTexts`, `showCustomForm`, `showCustomError`, `clearCustomError`. **No se tocaron los `innerHTML = ''` existentes** (ajuste del usuario: fuera de alcance).
+- `js/customHabitsFlow.js` (nuevo): conecta eventos y reutiliza `validateFields`/`createCustomHabit`/`editCustomHabit`/`archiveCustomHabit` de `customHabits.js` (sin duplicar lógica); archivar pasa por `showConfirm()` con `customArchiveConfirm`.
+- `js/app.js`: `baseHabits` (fijos) y `customs` separados; `let habits = [...baseHabits, ...activeCustomHabits(customs)]`. `onCustomsChanged` rearma la lista, reemplaza `session.daysData` por lo que devuelve `archiveCustomHabit` y recalcula `session.levelsByHabit = getTodayLevels(nextDaysData)`. `habitsFlow` recibe `getHabits()` en vez del array, porque `habits` ahora se reasigna.
+- `canAdd = occupiedSlots(customs, getTodayKey()) < MAX_SLOTS` y `formOpen` se recalculan **en cada `refresh()`**, incluido el de `visibilitychange` (ajuste del usuario): un hábito archivado ayer libera su lugar aunque la pestaña siga abierta. Si se archiva el hábito que se estaba editando, el form se cierra (ajuste del usuario).
+- Req. 5 verificado: `renderHabitList` ya leía `habit.minDesc`/`habit.fullDesc` para los hábitos `style: "direct"`, que son los mismos nombres que usan los propios. No hubo que adaptar el dato ni el render.
+- Req. 7: `getHabitsData()` filtra solo objetos (no `null` ni arrays) antes de leer `.archived`; `app.js` aplica el mismo filtro para armar el `Set` de ids. Una clave corrupta ya no impide arrancar.
+- `tests/`: prueba de entrada corrupta en `getHabitsData()` + alta de `customHabitsFlow` en `imports.test.js`. **63/63 pruebas verdes.**
+- **Smoke en navegador (clics reales)**: crear 3 → cuarto bloqueado con aviso → editar `custom-2` (las descripciones nuevas aparecen en la fila); archivar `custom-3` con 3 pendientes → saldo 0 → 3 y fijos sin bloquear, con el form de edición cerrado; archivar `custom-2` con puntos ya enviados → saldo idéntico (6 → 6) y fijos sin bloquear. Consola sin errores ni warnings antes y después de recargar; datos del usuario restaurados byte a byte (quedó solo su `habitQuest:world:v1` original).
+
 ## ⚙️ Bloques de ajuste (decididos — antes de la Fase 2)
 
 ### Bloque A — Datos y lógica  ✓ (implementado y probado el 2026-10-29)

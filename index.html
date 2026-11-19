@@ -23,6 +23,30 @@
     <section class="habits" id="view-hoy">
       <h2 id="habits-title"></h2>
       <div id="habits-list"></div>
+      <div class="custom-controls">
+        <button type="button" class="add-habit-btn" id="add-habit-btn" hidden></button>
+        <p class="custom-notice" id="custom-notice" hidden></p>
+        <form class="custom-form" id="custom-form" hidden novalidate>
+          <p class="custom-form-title" id="custom-form-title"></p>
+          <label class="custom-field">
+            <span id="custom-label-label"></span>
+            <input id="custom-label" name="label" type="text" maxlength="30" required autocomplete="off" />
+          </label>
+          <label class="custom-field">
+            <span id="custom-min-label"></span>
+            <input id="custom-min" name="minDesc" type="text" maxlength="40" required autocomplete="off" />
+          </label>
+          <label class="custom-field">
+            <span id="custom-full-label"></span>
+            <input id="custom-full" name="fullDesc" type="text" maxlength="40" required autocomplete="off" />
+          </label>
+          <p class="custom-error" id="custom-error" hidden></p>
+          <div class="custom-form-actions">
+            <button type="submit" class="custom-save" id="custom-save"></button>
+            <button type="button" class="custom-cancel" id="custom-cancel"></button>
+          </div>
+        </form>
+      </div>
       <button type="button" class="send-btn" id="send-btn"></button>
       <div class="points">
         <span id="points-total"></span>

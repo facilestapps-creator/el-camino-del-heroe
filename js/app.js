@@ -1,17 +1,19 @@
 // Orquestador: carga datos, define el estado de sesión, separa ACTUALIZAR
 // (updateState: efectos + guardado) de DIBUJAR (renderAll: solo lectura) y
 // conecta los 3 flujos (hábitos, mundo, respaldo) vía refresh().
-import { loadDays } from './storage.js';
+import { loadDays, loadCustomHabits } from './storage.js';
 import { loadJSON } from './dataFiles.js';
 import { textOf } from './text.js';
 import {
   getHabitsData,
+  getTodayKey,
   getTodayLevels,
   computeDayPoints,
   computeTotalSent,
   sendPastDays,
   migrateDaysData,
 } from './habits.js';
+import { activeCustomHabits, occupiedSlots, MAX_SLOTS } from './customHabits.js';
 import {
   renderAppName,
   renderCharacterName,
@@ -22,6 +24,8 @@ import {
   renderBalance,
   renderSendButton,
   renderBackupTexts,
+  renderCustomControls,
+  renderCustomFormTexts,
 } from './ui.js';
 import {
   getWorld,
@@ -38,6 +42,7 @@ import {
   renderWorldPanel,
 } from './worldUI.js';
 import { setupHabitsFlow } from './habitsFlow.js';
+import { setupCustomHabitsFlow } from './customHabitsFlow.js';
 import { createWorldFlow } from './worldFlow.js';
 import { renderLastBackupLine, setupBackupFlow } from './backupFlow.js';
 import { setupMapZoom } from './mapZoom.js';
@@ -74,7 +79,16 @@ async function main() {
   document.title = texts.appName;
 
   const habitsData = await getHabitsData();
-  const habits = habitsData.habits ?? [];
+  // getHabitsData() ya descarta entradas corruptas: se repite el filtro acá
+  // para que la lista de ids propios sea la misma que se va a dibujar.
+  const rawCustoms = loadCustomHabits().filter(
+    (habit) => typeof habit === 'object' && habit !== null && !Array.isArray(habit),
+  );
+  const customIdSet = new Set(rawCustoms.map((habit) => habit.id));
+  const baseHabits = (habitsData.habits ?? []).filter((habit) => !customIdSet.has(habit.id));
+  let customs = rawCustoms;
+  let habits = [...baseHabits, ...activeCustomHabits(customs)];
+  let customFlow;
   const stepsPerPoint = typeof habitsData.stepsPerPoint === 'number' ? habitsData.stepsPerPoint : 700;
   const maxSteps = typeof habitsData.maxSteps === 'number' ? habitsData.maxSteps : 30000;
 
@@ -115,7 +129,12 @@ async function main() {
   // DIBUJAR: solo lectura del estado, sin efectos secundarios.
   function renderAll() {
     const { sent, pending } = computeDayPoints(session.levelsByHabit, habits);
-    renderHabitList(habits, session.levelsByHabit, textsBag, stepsPerPoint);
+    const activeIds = new Set(activeCustomHabits(customs).map((habit) => habit.id));
+    // Se recalcula en CADA refresh (también el de visibilitychange): un hábito
+    // archivado ayer deja de ocupar lugar aunque la pestaña siga abierta.
+    const canAdd = occupiedSlots(customs, getTodayKey()) < MAX_SLOTS;
+    renderHabitList(habits, session.levelsByHabit, textsBag, stepsPerPoint, activeIds);
+    renderCustomControls({ canAdd, formOpen: customFlow?.isFormOpen() ?? false, texts: textsBag });
     renderPoints(sent, pending, pointLines, pointVars);
     renderSendButton(pending, sendText, textOf(textsBag, 'sendLabel'));
     renderBalance(computeBalance(), balanceText, textsBag.balanceLabel);
@@ -132,7 +151,23 @@ async function main() {
 
   const { panelHandlers } = createWorldFlow({ world, session, textsBag, computeBalance, refresh });
 
-  setupHabitsFlow({ session, habits, stepsPerPoint, maxSteps, textsBag, refresh });
+  setupHabitsFlow({ session, getHabits: () => habits, stepsPerPoint, maxSteps, textsBag, refresh });
+  customFlow = setupCustomHabitsFlow({
+    session,
+    textsBag,
+    getHabits: () => habits,
+    getCustoms: () => customs,
+    onCustomsChanged: (nextCustoms, nextDaysData) => {
+      customs = nextCustoms;
+      habits = [...baseHabits, ...activeCustomHabits(customs)];
+      if (nextDaysData) {
+        session.daysData = nextDaysData;
+        session.levelsByHabit = getTodayLevels(nextDaysData);
+      }
+    },
+    refresh,
+  });
+  renderCustomFormTexts(textsBag, textOf(textsBag, 'customNewTitle'));
   setupBackupFlow({ textsBag, onExported: () => renderLastBackupLine(textsBag) });
 
   renderViewToggle(textOf(textsBag, 'habitsTitle'), worldTexts.worldTitle);

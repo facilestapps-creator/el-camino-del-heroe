@@ -60,6 +60,7 @@ habit-quest/
 │   ├── backupFlow.js       (flujo de respaldo: exportar/importar + línea "último respaldo")
 │   ├── config.js           (claves, versiones y STORAGE_PREFIX)
 │   ├── customHabits.js     (hábitos propios: validar, crear/editar/archivar, tope 3)
+│   ├── customHabitsFlow.js (pantalla de hábitos propios: form en línea, Editar/Archivar)
 │   ├── dataFiles.js        (lectura de data/*.json — único módulo con fetch)
 │   ├── habits.js
 │   ├── habitsFlow.js       (flujo de hábitos: tap por nivel, pasos, Enviar)
@@ -85,6 +86,8 @@ habit-quest/
 │   │   └── localStorage.js (localStorage falso en memoria, se reinicia por prueba)
 │   ├── imports.test.js     (todos los módulos salvo app.js importan sin error en Node)
 │   ├── habits.test.js
+│   ├── customHabits.test.js (lógica de hábitos propios y entradas corruptas)
+│   ├── mapZoom.test.js
 │   ├── world.test.js
 │   ├── backup.test.js
 │   └── data.test.js        (integridad de world/stories/habits.json)

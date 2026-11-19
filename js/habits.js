@@ -8,7 +8,11 @@ import { saveDays, loadCustomHabits } from './storage.js';
 // data/habits.json nunca se escribe: los hábitos propios viven solo en storage.
 export async function getHabitsData() {
   const data = await loadJSON('habits');
-  const customs = loadCustomHabits().filter((habit) => !habit.archived);
+  // Una clave corrupta en customHabits no debe impedir que arranque la app:
+  // solo se lee .archived de elementos que sean objetos (no null ni arrays).
+  const customs = loadCustomHabits().filter(
+    (habit) => typeof habit === 'object' && habit !== null && !Array.isArray(habit) && !habit.archived,
+  );
   return { ...data, habits: [...(data.habits ?? []), ...customs] };
 }
 

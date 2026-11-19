@@ -29,7 +29,7 @@ export function renderHabitsTitle(title) {
   }
 }
 
-export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
+export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint, customIds = new Set()) {
   const container = document.getElementById('habits-list');
   container.innerHTML = '';
 
@@ -113,6 +113,9 @@ export function renderHabitList(habits, levelsByHabit, texts, stepsPerPoint) {
 
       row.appendChild(info);
       row.appendChild(actions);
+      if (customIds.has(habit.id)) {
+        row.appendChild(customActions(texts));
+      }
       container.appendChild(row);
       if (locked) {
         row.appendChild(lockedTag(texts));
@@ -128,6 +131,79 @@ function lockedTag(texts) {
   tag.className = 'habit-locked-tag';
   tag.textContent = textOf(texts, 'habitLocked');
   return tag;
+}
+
+// Botones Editar/Archivar: solo para los hábitos propios. El id se toma de la
+// fila (data-habit-id), así no se duplica en cada botón.
+function customActions(texts) {
+  const wrap = document.createElement('div');
+  wrap.className = 'custom-actions';
+  const specs = [
+    { action: 'edit', label: textOf(texts, 'customEditButton') },
+    { action: 'archive', label: textOf(texts, 'customArchiveButton') },
+  ];
+  for (const spec of specs) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.customAction = spec.action;
+    button.textContent = spec.label;
+    wrap.appendChild(button);
+  }
+  return wrap;
+}
+
+// V2 pieza 3 — el estado del botón y del aviso se recalcula en cada refresh().
+// canAdd = quedan lugares libres hoy; formOpen = el formulario está desplegado.
+export function renderCustomControls({ canAdd, formOpen, texts }) {
+  const button = document.getElementById('add-habit-btn');
+  const notice = document.getElementById('custom-notice');
+  if (button) {
+    button.textContent = textOf(texts, 'addHabitLabel');
+    button.hidden = !canAdd || formOpen;
+  }
+  if (notice) {
+    notice.textContent = canAdd ? '' : textOf(texts, 'customFullNotice');
+    notice.hidden = canAdd;
+  }
+}
+
+// Los textos del form salen de texts.json; el título cambia según crear/editar.
+export function renderCustomFormTexts(texts, title) {
+  const set = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = value;
+    }
+  };
+  set('custom-form-title', title);
+  set('custom-label-label', textOf(texts, 'customLabelLabel'));
+  set('custom-min-label', textOf(texts, 'customMinLabel'));
+  set('custom-full-label', textOf(texts, 'customFullLabel'));
+  set('custom-save', textOf(texts, 'customSaveLabel'));
+  set('custom-cancel', textOf(texts, 'confirmCancelLabel'));
+}
+
+export function showCustomForm(visible) {
+  const form = document.getElementById('custom-form');
+  if (form) {
+    form.hidden = !visible;
+  }
+}
+
+export function showCustomError(message) {
+  const element = document.getElementById('custom-error');
+  if (element) {
+    element.textContent = message;
+    element.hidden = false;
+  }
+}
+
+export function clearCustomError() {
+  const element = document.getElementById('custom-error');
+  if (element) {
+    element.textContent = '';
+    element.hidden = true;
+  }
 }
 
 // Aviso de validación debajo del campo de pasos. El mensaje ya viene

@@ -229,6 +229,13 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
 - Sin pantalla ni textos nuevos (eso es la pieza 3). `tests/customHabits.test.js` (9 pruebas nuevas), casos en `backup.test.js` y `imports.test.js`.
 - **Probado**: `npm test` → **62/62** en verde. Incluye prueba que demuestra que `migrateDaysData`, `sendPastDays` y `computeDayPoints` conservan entradas de ids archivados; que el auto-envío no bloquea `ejercicio` ni toca otros días; y que los puntos archivados siguen sumando al saldo (`computeTotalSent`) aunque salgan de "Puntos de hoy". Sin smoke de navegador: no hay UI en esta pieza.
 
+### Pieza 3 — Hábitos propios: pantalla ✓ (2026-11-19, V2)
+
+- `index.html`: botón **Agregar hábito**, aviso de tope y form en línea entre la lista y Enviar. `css/styles.css`: estilos mobile-first del botón, aviso, form y acciones Editar/Archivar.
+- `data/texts.json`: textos nuevos (sin valores de puntos); `js/ui.js`: filas propias con Editar/Archivar y render del form/aviso; `js/customHabitsFlow.js` (nuevo): eventos que reutilizan `customHabits.js` + confirmación genérica; `js/app.js`: lista rearmable, `session.daysData`/`levelsByHabit` actualizados desde `archiveCustomHabit`, y botón/aviso recalculados en cada `refresh()` (incluido `visibilitychange`).
+- `getHabitsData()` filtra entradas no objeto antes de leer `.archived`. Código nuevo solo con `textContent`; sin tocar los `innerHTML = ''` existentes.
+- **Probado en navegador con clics reales**: 3 altas, cuarto bloqueado, edición con descs visibles, archivado con pendientes (saldo 0→3) y con puntos ya enviados (saldo 6→6), fijos nunca bloqueados, form cerrado al archivar lo que se editaba, consola limpia y datos restaurados byte a byte. `npm test` → **63/63** en verde. Commit local, sin push (el usuario publica al cerrar el bloque).
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

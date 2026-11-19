@@ -17,6 +17,7 @@ const LOGIC_MODULES = [
   'ui',
   'worldUI',
   'habitsFlow',
+  'customHabitsFlow',
   'worldFlow',
   'backupFlow',
   'mapZoom',
