@@ -250,6 +250,12 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
 - `app.js`: carga `items.json` con `loadJSON`, `session.characterState`, `previousCityId` inicializado antes del primer `refresh()` y guardado tras cada cambio. `worldFlow.js`: `onExploreCity` usa la decisión, nuevo `onEquipItem`, sin «Ver objetos». `worldUI.js`: tarjetas con `data-slot`/color o `<img>` pixelado, botón «Ponerme», aviso «No quedan objetos.»; sin `innerHTML` nuevo. Textos nuevos solo en `data/texts.json`. CSS mobile-first de tarjetas.
 - **Probado**: `npm test` → **87/87** en verde (decisión de explorar, cambio de ciudad, cobro único, oferta invisible en viaje/mismatch, idempotencia, llegada con app cerrada). Smoke con clics reales: explorar (500→460), recargar (misma oferta, sin cobro, sin Explorar), «Ponerme» (sale de la oferta), última pieza → «No quedan objetos.», oferta oculta durante viaje, cancelar viaje → oferta intacta, «Viajar, entrar y explorar» (nueva oferta, cobro único +108) y vuelta (nueva oferta y cobro de nuevo); consola y red limpias, datos restaurados byte a byte. Commit local, sin push.
 
+### Pieza 6 — Pestaña Personaje ✓ (2026-11-19, V2)
+
+- Tercera pestaña **solo lectura** con el mismo mecanismo (`renderViewToggle`/`showView` en `worldUI.js`, listener en `app.js`, dibujo en `renderAll()`). Texto nuevo en `data/texts.json`: `characterTitle`.
+- `character.js`: **`equippedBySlot(characterState, catalog)`** pura, en orden de `catalog.slots`, con `item = null` para casillero vacío o id desconocido; 4 pruebas nuevas. `worldUI.js`: `createItemArt` extraído de la oferta (P5) y reutilizado; `renderCharacterPanel` recorre la función pura y dibuja figura CSS estática + 6 casilleros en dos columnas, sin `innerHTML` nuevo. Texto de nombres/etiquetas contenido en el cuadrado (`overflow-wrap: anywhere`). Sin acciones ni bonus.
+- **Probado**: `npm test` → **91/91** en verde. Smoke a **360 px** con clics reales: piezas puestas desde la P5 visibles al abrir Personaje y tras recargar; id desconocido → casillero vacío sin romper; 3 pestañas y 6 casilleros sin scroll horizontal; nombre largo sin desborde; zoom del mapa intacto al pasar por las 3 pestañas y con `refresh()` activo, doble toque → 1x; consola y red limpias, datos restaurados byte a byte. Commit local, sin push.
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

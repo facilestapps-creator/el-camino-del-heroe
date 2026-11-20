@@ -154,3 +154,17 @@ export function syncOfferOnCityChange({
   }
   return { previousCityId: currentCityId, characterState: next, changed: true };
 }
+
+// Vista Personaje (P6): una entrada por casillero, en el orden de catalog.slots.
+// item = null si el casillero está vacío o si el id guardado ya no está en el
+// catálogo (los ids viejos se ignoran sin borrarlos del estado). Puro: solo lee.
+export function equippedBySlot(characterState, catalog) {
+  const items = catalogItems(catalog);
+  return (catalog?.slots ?? [])
+    .filter((slot) => isPlainObject(slot) && typeof slot.id === 'string')
+    .map((slot) => ({
+      slot,
+      item: items.find((item) => item.slot === slot.id
+        && characterState?.equipped?.[slot.id] === item.id) ?? null,
+    }));
+}

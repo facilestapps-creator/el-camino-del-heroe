@@ -14,6 +14,7 @@ import {
   clearOffer,
   visibleOffer,
   syncOfferOnCityChange,
+  equippedBySlot,
 } from '../js/character.js';
 
 const catalog = JSON.parse(
@@ -299,4 +300,39 @@ test('syncOfferOnCityChange: viaje completado con la app cerrada se detecta al a
   assert.ok(savedWorld.explored.includes('vornstead'));
   assert.equal(result.characterState.offer.cityId, 'vornstead');
   assert.equal(result.characterState.offer.itemIds.length, 1);
+});
+
+// V2 / Pieza 6 — vista Personaje: una entrada por casillero, en orden, sin tocar el estado.
+test('equippedBySlot: vacío → todos los casilleros con item null, en orden de catalog.slots', () => {
+  const result = equippedBySlot(makeState(), catalog);
+  assert.deepEqual(result.map((entry) => entry.slot.id), catalog.slots.map((slot) => slot.id));
+  assert.ok(result.every((entry) => entry.item === null));
+  assert.equal(result.length, 6);
+});
+
+test('equippedBySlot: pieza válida → item en su casillero, los demás vacíos', () => {
+  const state = makeState({ casco: 'casco-01', calzado: 'calzado-02' });
+  const result = equippedBySlot(state, catalog);
+  const byId = new Map(result.map((entry) => [entry.slot.id, entry.item]));
+  assert.equal(byId.get('casco').id, 'casco-01');
+  assert.equal(byId.get('calzado').id, 'calzado-02');
+  assert.equal(byId.get('armadura'), null);
+  assert.deepEqual(state, makeState({ casco: 'casco-01', calzado: 'calzado-02' })); // no muta
+});
+
+test('equippedBySlot: id desconocido o de otro casillero → casillero vacío sin romper', () => {
+  const result = equippedBySlot(makeState({
+    casco: 'pieza-que-ya-no-existe',
+    armadura: 'calzado-01', // id válido, pero guardado en el casillero equivocado
+  }), catalog);
+  const byId = new Map(result.map((entry) => [entry.slot.id, entry.item]));
+  assert.equal(byId.get('casco'), null);
+  assert.equal(byId.get('armadura'), null);
+  assert.equal(byId.get('calzado'), null);
+  assert.equal(result.length, catalog.slots.length);
+});
+
+test('equippedBySlot: catálogo sin slots/items o estado sin equipped → solo vacíos, sin lanzar', () => {
+  assert.deepEqual(equippedBySlot(makeState(), { slots: [], items: [] }), []);
+  assert.deepEqual(equippedBySlot(null, null), []);
 });

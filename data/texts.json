@@ -45,6 +45,7 @@
     "customErrorSlots": "Ya tenés 3 lugares ocupados hoy.",
     "customArchiveConfirm": "Al archivar «{label}» se envían sus puntos de hoy y el lugar queda ocupado hasta mañana. ¿Continuar?",
     "equipItemLabel": "Ponerme",
-    "offerEmptyText": "No quedan objetos."
+    "offerEmptyText": "No quedan objetos.",
+    "characterTitle": "Personaje"
   }
 }

@@ -2,7 +2,15 @@
 import {
   destinationsFrom, exploreDecision, hasExplored, markerPosition, tripArrived,
 } from './world.js';
+import { equippedBySlot } from './character.js';
 import { textOf, fillText } from './text.js';
+
+// Vista Personaje (P6): columnas fijas a los lados de la figura. Los ids son
+// claves estructurales de los 6 casilleros; las etiquetas vienen de items.json.
+const CHARACTER_COLUMNS = [
+  ['casco', 'hombreras', 'brazaletes'],
+  ['armadura', 'pantalones', 'calzado'],
+];
 
 // Modal de dragones: MUESTRA el resultado de la moneda (la tirada vive en
 // world.js — rollDragon). Si es recién tirada: animación. Si viene guardada
@@ -53,33 +61,45 @@ export function showDragonCoin(world, roll, onResolved) {
   setTimeout(finish, 1400);
 }
 
-export function renderViewToggle(hoyLabel, worldLabel) {
+export function renderViewToggle(hoyLabel, worldLabel, characterLabel) {
   const hoyButton = document.getElementById('view-hoy-btn');
   const worldButton = document.getElementById('view-world-btn');
+  const characterButton = document.getElementById('view-character-btn');
   if (hoyButton) {
     hoyButton.textContent = hoyLabel;
   }
   if (worldButton) {
     worldButton.textContent = worldLabel;
   }
+  if (characterButton) {
+    characterButton.textContent = characterLabel;
+  }
 }
 
 export function showView(view) {
   const hoy = document.getElementById('view-hoy');
   const world = document.getElementById('view-world');
+  const character = document.getElementById('view-character');
   const hoyButton = document.getElementById('view-hoy-btn');
   const worldButton = document.getElementById('view-world-btn');
+  const characterButton = document.getElementById('view-character-btn');
   if (hoy) {
     hoy.hidden = view !== 'hoy';
   }
   if (world) {
     world.hidden = view !== 'world';
   }
+  if (character) {
+    character.hidden = view !== 'character';
+  }
   if (hoyButton) {
     hoyButton.classList.toggle('active', view === 'hoy');
   }
   if (worldButton) {
     worldButton.classList.toggle('active', view === 'world');
+  }
+  if (characterButton) {
+    characterButton.classList.toggle('active', view === 'character');
   }
 }
 
@@ -312,19 +332,7 @@ function appendOffer(panel, offer, catalog, textsBag, handlers) {
   for (const item of items) {
     const card = document.createElement('div');
     card.className = 'offer-card';
-
-    const art = document.createElement('div');
-    art.className = 'offer-art';
-    art.dataset.slot = item.slot; // el color por casillero vive en el CSS
-    if (typeof item.image === 'string' && item.image !== '') {
-      const image = document.createElement('img');
-      image.src = item.image;
-      image.alt = item.name;
-      art.appendChild(image);
-    } else {
-      art.textContent = item.name;
-    }
-    card.appendChild(art);
+    card.appendChild(createItemArt(item));
 
     const equip = document.createElement('button');
     equip.type = 'button';
@@ -343,4 +351,71 @@ function appendOffer(panel, offer, catalog, textsBag, handlers) {
     empty.textContent = textOf(textsBag, 'offerEmptyText');
     panel.appendChild(empty);
   }
+}
+
+// Cuadrado de una pieza, compartido por la oferta (P5) y el Personaje (P6):
+// imagen pixelada si tiene, o color por casillero + nombre. Sin innerHTML.
+export function createItemArt(item) {
+  const art = document.createElement('div');
+  art.className = 'offer-art';
+  art.dataset.slot = item.slot; // el color por casillero vive en el CSS
+  if (typeof item.image === 'string' && item.image !== '') {
+    const image = document.createElement('img');
+    image.src = item.image;
+    image.alt = item.name;
+    art.appendChild(image);
+  } else {
+    art.textContent = item.name;
+  }
+  return art;
+}
+
+// Vista Personaje (P6): solo lectura. Recorre equippedBySlot (puro) y dibuja
+// la figura estática en el centro con los 6 casilleros a los lados. Los ids
+// desconocidos ya vinieron como item null → casillero vacío con su etiqueta.
+export function renderCharacterPanel(characterState, catalog) {
+  const view = document.getElementById('character-view');
+  if (!view) {
+    return;
+  }
+  view.replaceChildren();
+
+  const layout = document.createElement('div');
+  layout.className = 'character-layout';
+  const byId = new Map(equippedBySlot(characterState, catalog)
+    .map((entry) => [entry.slot.id, entry]));
+
+  CHARACTER_COLUMNS.forEach((columnIds, index) => {
+    const column = document.createElement('div');
+    column.className = 'character-column';
+    for (const slotId of columnIds) {
+      const entry = byId.get(slotId);
+      if (!entry) {
+        continue;
+      }
+      if (entry.item) {
+        column.appendChild(createItemArt(entry.item));
+      } else {
+        const empty = document.createElement('div');
+        empty.className = 'offer-art slot-empty';
+        empty.textContent = typeof entry.slot.label === 'string' ? entry.slot.label : '';
+        column.appendChild(empty);
+      }
+    }
+    if (index === 0) {
+      layout.appendChild(column);
+      const figure = document.createElement('div');
+      figure.className = 'character-figure';
+      for (const part of ['head', 'torso', 'arm-left', 'arm-right', 'leg-left', 'leg-right']) {
+        const piece = document.createElement('div');
+        piece.className = `figure-${part}`;
+        figure.appendChild(piece);
+      }
+      layout.appendChild(figure);
+    } else {
+      layout.appendChild(column);
+    }
+  });
+
+  view.appendChild(layout);
 }

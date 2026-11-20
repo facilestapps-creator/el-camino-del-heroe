@@ -43,6 +43,7 @@ import {
   renderWorldMap,
   renderWorldBalance,
   renderWorldPanel,
+  renderCharacterPanel,
 } from './worldUI.js';
 import { setupHabitsFlow } from './habitsFlow.js';
 import { setupCustomHabitsFlow } from './customHabitsFlow.js';
@@ -173,6 +174,7 @@ async function main() {
       world, session.worldState, worldTexts, storiesBag, computeBalance(), panelHandlers,
       session.characterState, itemsData, textsBag,
     );
+    renderCharacterPanel(session.characterState, itemsData);
   }
 
   // Orquestador: todo cambio de estado pasa por acá (actualizar + dibujar).
@@ -204,7 +206,10 @@ async function main() {
   renderCustomFormTexts(textsBag, textOf(textsBag, 'customNewTitle'));
   setupBackupFlow({ textsBag, onExported: () => renderLastBackupLine(textsBag) });
 
-  renderViewToggle(textOf(textsBag, 'habitsTitle'), worldTexts.worldTitle);
+  renderViewToggle(
+    textOf(textsBag, 'habitsTitle'), worldTexts.worldTitle,
+    textOf(textsBag, 'characterTitle'),
+  );
   showView(currentView);
   setupMapZoom();
   refresh();
@@ -215,6 +220,10 @@ async function main() {
   });
   document.getElementById('view-world-btn').addEventListener('click', () => {
     currentView = 'world';
+    showView(currentView);
+  });
+  document.getElementById('view-character-btn').addEventListener('click', () => {
+    currentView = 'character';
     showView(currentView);
   });
 

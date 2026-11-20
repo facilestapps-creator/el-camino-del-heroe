@@ -449,19 +449,19 @@ body {
 .view-toggle {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.3rem;
   margin-top: 1.25rem;
 }
 
 .view-btn {
-  padding: 0.5rem 1.25rem;
+  padding: 0.45rem 0.7rem;
   border-radius: 999px;
   border: 1px solid #334155;
   background: transparent;
   color: #94a3b8;
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   cursor: pointer;
 }
 
@@ -656,11 +656,12 @@ body {
   border-radius: 10px;
   background: #334155;
   color: #f8fafc;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.2;
   text-align: center;
   overflow: hidden;
+  overflow-wrap: anywhere; /* nombres largos: se parten, nunca desbordan el cuadrado */
 }
 
 .offer-art img {
@@ -688,6 +689,88 @@ body {
   font-size: 0.85rem;
   text-align: center;
 }
+
+/* V2/P6 — Pestaña Personaje: 6 casilleros alrededor de una figura neutra.
+   El cuadrado de cada casillero ES .offer-art (reutilizado de la P5). */
+
+.character {
+  margin-top: 1.25rem;
+  text-align: left;
+}
+
+.character-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(72px, 92px) minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: center;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.character-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.slot-empty {
+  background: #1e293b;
+  border-style: dashed;
+  color: #94a3b8; /* etiqueta atenuada */
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.character-figure {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 2;
+}
+
+.character-figure > div {
+  position: absolute;
+  background: #475569;
+  border: 1px solid #64748b;
+}
+
+.figure-head {
+  left: 33%;
+  top: 2%;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.figure-torso {
+  left: 23%;
+  top: 26%;
+  width: 54%;
+  height: 38%;
+  border-radius: 30% 30% 12% 12%;
+}
+
+.figure-arm-left,
+.figure-arm-right {
+  top: 28%;
+  width: 16%;
+  height: 34%;
+  border-radius: 999px;
+}
+
+.figure-arm-left { left: 8%; }
+.figure-arm-right { right: 8%; }
+
+.figure-leg-left,
+.figure-leg-right {
+  bottom: 2%;
+  width: 20%;
+  height: 30%;
+  border-radius: 8px 8px 12px 12px;
+}
+
+.figure-leg-left { left: 26%; }
+.figure-leg-right { right: 26%; }
 
 /* Fase 2 — Modal de dragones + moneda al aire */
 
