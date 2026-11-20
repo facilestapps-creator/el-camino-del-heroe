@@ -2,7 +2,7 @@
 // (world.json, stories.json, habits.json, items.json).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 const readJSON = (name) => JSON.parse(
   readFileSync(new URL(`../data/${name}.json`, import.meta.url), 'utf8'),
@@ -89,7 +89,7 @@ test('catálogo de personaje: cada pieza apunta a un casillero existente y los i
   }
 });
 
-test('catálogo de personaje: 2 piezas por casillero, con nombre y sin imagen', () => {
+test('catálogo de personaje: 2 piezas por casillero, con nombre e imagen', () => {
   for (const slot of itemsData.slots) {
     const pieces = itemsData.items.filter((item) => item.slot === slot.id);
     assert.equal(pieces.length, 2, `casillero ${slot.id}: se esperaban 2 piezas`);
@@ -97,7 +97,18 @@ test('catálogo de personaje: 2 piezas por casillero, con nombre y sin imagen', 
   for (const item of itemsData.items) {
     assert.equal(typeof item.name, 'string');
     assert.ok(item.name !== '');
-    assert.equal(item.image, null, `pieza ${item.id}: los ejemplos no traen imagen`);
+    assert.equal(typeof item.image, 'string', `pieza ${item.id}: falta la imagen`);
+    assert.ok(item.image !== '', `pieza ${item.id}: imagen vacía`);
+  }
+});
+
+// V2/P7: el arte vive en assets/items y el nombre del archivo coincide con el id.
+test('catálogo de personaje: cada image apunta a un archivo que existe', () => {
+  for (const item of itemsData.items) {
+    assert.ok(
+      existsSync(new URL(`../${item.image}`, import.meta.url)),
+      `pieza ${item.id}: no existe el archivo "${item.image}"`,
+    );
   }
 });
 

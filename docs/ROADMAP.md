@@ -256,6 +256,12 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
 - `character.js`: **`equippedBySlot(characterState, catalog)`** pura, en orden de `catalog.slots`, con `item = null` para casillero vacío o id desconocido; 4 pruebas nuevas. `worldUI.js`: `createItemArt` extraído de la oferta (P5) y reutilizado; `renderCharacterPanel` recorre la función pura y dibuja figura CSS estática + 6 casilleros en dos columnas, sin `innerHTML` nuevo. Texto de nombres/etiquetas contenido en el cuadrado (`overflow-wrap: anywhere`). Sin acciones ni bonus.
 - **Probado**: `npm test` → **91/91** en verde. Smoke a **360 px** con clics reales: piezas puestas desde la P5 visibles al abrir Personaje y tras recargar; id desconocido → casillero vacío sin romper; 3 pestañas y 6 casilleros sin scroll horizontal; nombre largo sin desborde; zoom del mapa intacto al pasar por las 3 pestañas y con `refresh()` activo, doble toque → 1x; consola y red limpias, datos restaurados byte a byte. Commit local, sin push.
 
+### Pieza 7 — Arte de las piezas del Personaje ✓ (2026-11-19, V2)
+
+- `data/items.json`: las 12 piezas pasaron de `image: null` a `image: "assets/items/<id>.png"` con los nombres definitivos; ids y casilleros intactos, sin cambios en JS.
+- CSS: `.offer-art[data-slot]:has(img)` da el fondo neutro `#1e293b` a las piezas con imagen (el color por casillero queda solo para las que no tienen), con PNG centrado y `object-fit: contain`. `tests/data.test.js`: test de imagen actualizado + nuevo test `existsSync` de los 12 archivos.
+- **Probado**: `npm test` → **92/92** en verde. Smoke a **360 px**: Explorar → «Ponerme» → pieza visible en tarjeta y Personaje, fondo neutro verificado por `getComputedStyle`, 12 PNG con status 200 (sin 404), persistencia tras recargar, consola/red limpias, datos restaurados byte a byte. Commit local, sin push.
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

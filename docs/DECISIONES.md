@@ -219,6 +219,13 @@ Un dato vive en un solo archivo, y cada módulo tiene una responsabilidad:
 - **Pruebas 91/91 verdes** (`npm test`, +4 nuevas en `tests/character.test.js`): vacío, pieza válida, id desconocido (y de otro casillero) y orden de casilleros; sin módulos nuevos, `imports.test.js` sigue cubriendo `worldUI.js`.
 - **Smoke a 360 px (clics reales)**: piezas puestas desde la P5 (Explorar → «Ponerme» → «Hombreras 1» en su casillero); recargar → siguen; id desconocido en `character:v1` → casillero vacío con etiqueta, sin romper; los 6 casilleros y las 3 pestañas sin scroll horizontal (`body.scrollWidth` = 360, max right = 360); nombre larguísimo dentro del cuadrado sin desborde; pestañas Hoy ↔ Camino ↔ Personaje con zoom 2,25x intacto al volver y reset a 1x con doble toque; `refresh()` con zoom activo no altera el transform; consola y red limpias; datos del usuario restaurados byte a byte.
 
+## 🔲 Pieza 7 — Arte de las piezas del Personaje (V2, 2026-11-19)
+
+- **Solo datos + CSS**: los 12 PNG (128×128, fondo transparente) ya estaban en `assets/items/`; `data/items.json` pasó de `image: null` a `image: "assets/items/<id>.png"` en las 12 piezas, con los nombres definitivos (p. ej. «Yelmo de hierro y cuero», «Coraza con correas», «Perneras de acero»). No se cambiaron ids ni casilleros; no se tocó código JS.
+- **Fondo por casillero = solo piezas sin imagen**: antes `.offer-art[data-slot='…']` teñía el cuadrado siempre. Se agregó `.offer-art[data-slot]:has(img) { background: #1e293b; }` (el neutro de `.slot-empty`, con especificidad mayor que la regla de color) para que una pieza con arte no use el color de su casillero. El PNG sigue centrado y contenido sin deformar por `.offer-art img` (`object-fit: contain`, `image-rendering: pixelated`), que ya existía; las piezas sin imagen conservan el color de siempre.
+- **Prueba de datos** (`tests/data.test.js`): el test que exigía `image === null` se cambió por «nombre e imagen» y se agregó uno nuevo que verifica con `existsSync` que los 12 archivos de `image` existen. **92/92 pruebas verdes**.
+- **Smoke a 360 px (clics reales)**: Explorar → «Ponerme» → «Coraza con correas» se ve en la tarjeta y en Personaje; `getComputedStyle` confirmó fondo `rgb(30, 41, 59)` (no el color del casillero), `object-fit: contain` y `naturalWidth` 128; los 12 PNG dieron 200 (sin 404), recargar conservó la pieza, `body.scrollWidth` = 360 sin elemento que desborde, consola y red limpias, datos del usuario restaurados byte a byte. Commit local, sin push.
+
 ## ⚙️ Bloques de ajuste (decididos — antes de la Fase 2)
 
 ### Bloque A — Datos y lógica  ✓ (implementado y probado el 2026-10-29)

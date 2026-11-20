@@ -671,13 +671,17 @@ body {
   image-rendering: pixelated;
 }
 
-/* Color por casillero mientras las piezas de ejemplo no tienen imagen. */
+/* Color por casillero SOLO para piezas sin imagen (dibujadas con texto). */
 .offer-art[data-slot='casco'] { background: #1d4ed8; }
 .offer-art[data-slot='armadura'] { background: #b45309; }
 .offer-art[data-slot='brazaletes'] { background: #7e22ce; }
 .offer-art[data-slot='hombreras'] { background: #0f766e; }
 .offer-art[data-slot='pantalones'] { background: #be123c; }
 .offer-art[data-slot='calzado'] { background: #3f6212; }
+
+/* Con imagen: fondo neutro oscuro (el de .slot-empty), nunca el color del
+   casillero. El PNG ya se centra y se contiene sin deformar en .offer-art img. */
+.offer-art[data-slot]:has(img) { background: #1e293b; }
 
 .offer-equip {
   width: 100%;

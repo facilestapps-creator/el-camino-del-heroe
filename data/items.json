@@ -8,17 +8,17 @@
     { "id": "calzado", "label": "Calzado" }
   ],
   "items": [
-    { "id": "casco-01", "slot": "casco", "name": "Casco 1", "image": null },
-    { "id": "casco-02", "slot": "casco", "name": "Casco 2", "image": null },
-    { "id": "armadura-01", "slot": "armadura", "name": "Armadura 1", "image": null },
-    { "id": "armadura-02", "slot": "armadura", "name": "Armadura 2", "image": null },
-    { "id": "brazaletes-01", "slot": "brazaletes", "name": "Brazaletes 1", "image": null },
-    { "id": "brazaletes-02", "slot": "brazaletes", "name": "Brazaletes 2", "image": null },
-    { "id": "hombreras-01", "slot": "hombreras", "name": "Hombreras 1", "image": null },
-    { "id": "hombreras-02", "slot": "hombreras", "name": "Hombreras 2", "image": null },
-    { "id": "pantalones-01", "slot": "pantalones", "name": "Pantalones 1", "image": null },
-    { "id": "pantalones-02", "slot": "pantalones", "name": "Pantalones 2", "image": null },
-    { "id": "calzado-01", "slot": "calzado", "name": "Calzado 1", "image": null },
-    { "id": "calzado-02", "slot": "calzado", "name": "Calzado 2", "image": null }
+    { "id": "casco-01", "slot": "casco", "name": "Yelmo de hierro y cuero", "image": "assets/items/casco-01.png" },
+    { "id": "casco-02", "slot": "casco", "name": "Yelmo de acero", "image": "assets/items/casco-02.png" },
+    { "id": "armadura-01", "slot": "armadura", "name": "Coraza con correas", "image": "assets/items/armadura-01.png" },
+    { "id": "armadura-02", "slot": "armadura", "name": "Coraza de acero", "image": "assets/items/armadura-02.png" },
+    { "id": "brazaletes-01", "slot": "brazaletes", "name": "Brazales de cuero", "image": "assets/items/brazaletes-01.png" },
+    { "id": "brazaletes-02", "slot": "brazaletes", "name": "Brazales de acero", "image": "assets/items/brazaletes-02.png" },
+    { "id": "hombreras-01", "slot": "hombreras", "name": "Hombreras de cuero", "image": "assets/items/hombreras-01.png" },
+    { "id": "hombreras-02", "slot": "hombreras", "name": "Hombreras de acero", "image": "assets/items/hombreras-02.png" },
+    { "id": "pantalones-01", "slot": "pantalones", "name": "Perneras de cuero", "image": "assets/items/pantalones-01.png" },
+    { "id": "pantalones-02", "slot": "pantalones", "name": "Perneras de acero", "image": "assets/items/pantalones-02.png" },
+    { "id": "calzado-01", "slot": "calzado", "name": "Botas de cuero", "image": "assets/items/calzado-01.png" },
+    { "id": "calzado-02", "slot": "calzado", "name": "Botas de acero", "image": "assets/items/calzado-02.png" }
   ]
 }
