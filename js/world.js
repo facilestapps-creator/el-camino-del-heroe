@@ -1,6 +1,7 @@
 import { WORLD_KEY, WORLD_SCHEMA_VERSION } from './config.js';
 import { loadJSON } from './dataFiles.js';
 import { loadFromStorage, saveToStorage } from './storage.js';
+import { visibleOffer } from './character.js';
 
 // Modelo del mundo: estado del viajero, costos y caminos.
 
@@ -445,16 +446,52 @@ export function hasExplored(state, cityId) {
   return state.explored.includes(cityId);
 }
 
-// Explorar: solo en una ciudad ENTRADA (visited) y aun no explorada.
-// Cuesta explorationCost × multiplier y marca la ciudad.
+// Explorar: requiere ciudad ENTRADA (visited), sin viaje en curso y saldo.
+// V2/P5: `explored` es solo el historial permanente (para la etiqueta y la
+// historia), NO un bloqueo: en cada estadía se puede volver a explorar y pagar.
+// Por eso la ciudad no se agrega dos veces.
 export function exploreCity(world, state, balance) {
   const cost = exploreCost(world);
   if (!state.visited.includes(state.currentCity)
-    || hasExplored(state, state.currentCity)
+    || state.trip !== null
     || balance < cost) {
     return false;
   }
   state.spent += cost;
-  state.explored.push(state.currentCity);
+  if (!state.explored.includes(state.currentCity)) {
+    state.explored.push(state.currentCity);
+  }
   return true;
+}
+
+// Decisión del panel, pura: con oferta válida se muestran las tarjetas y NO
+// aparece Explorar. Sin oferta, Explorar sigue como hoy (visitada, sin viaje y
+// con saldo suficiente). Une las reglas para que el handler no cobre dos veces.
+export function exploreDecision(world, worldState, characterState, balance) {
+  const offer = visibleOffer(characterState, worldState);
+  const cost = exploreCost(world);
+  const entered = worldState.visited.includes(worldState.currentCity);
+  const inTrip = worldState.trip !== null;
+  const enough = balance >= cost;
+  const canExplore = offer === null && !inTrip && entered && enough;
+  let reason = null;
+  if (offer !== null) {
+    reason = 'offer';
+  } else if (inTrip) {
+    reason = 'trip';
+  } else if (!entered) {
+    reason = 'notEntered';
+  } else if (!enough) {
+    reason = 'insufficient';
+  }
+  return {
+    showOffer: offer !== null,
+    offer,
+    canExplore,
+    disabled: !canExplore,
+    cost,
+    entered,
+    inTrip,
+    reason,
+  };
 }

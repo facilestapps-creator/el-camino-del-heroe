@@ -1,5 +1,7 @@
 // Render de la vista del mundo (mapa, ubicación, panel de viaje).
-import { destinationsFrom, exploreCost, hasExplored, markerPosition, tripArrived } from './world.js';
+import {
+  destinationsFrom, exploreDecision, hasExplored, markerPosition, tripArrived,
+} from './world.js';
 import { textOf, fillText } from './text.js';
 
 // Modal de dragones: MUESTRA el resultado de la moneda (la tirada vive en
@@ -124,7 +126,9 @@ function cityById(world, id) {
   return world.cities.find((c) => c.id === id) ?? null;
 }
 
-export function renderWorldPanel(world, state, worldTexts, storiesBag, balance, handlers) {
+export function renderWorldPanel(
+  world, state, worldTexts, storiesBag, balance, handlers, characterState, catalog, textsBag,
+) {
   const panel = document.getElementById('world-panel');
   if (!panel) {
     return;
@@ -174,8 +178,13 @@ export function renderWorldPanel(world, state, worldTexts, storiesBag, balance, 
     panel.appendChild(title);
   }
 
-  // Acciones de la ciudad actual (arriba): Entrar (gratis) + Explorar/Explorada.
-  appendCityActions(world, state, worldTexts, storiesBag, balance, handlers, panel, arrived);
+  // Acciones de la ciudad actual (arriba): Entrar + etiqueta/historia +
+  // tarjetas de la oferta o Explorar (decisión única, también la usa el handler).
+  const decision = exploreDecision(world, state, characterState, balance);
+  appendCityActions(
+    world, state, worldTexts, storiesBag, balance, handlers, panel, arrived,
+    decision, catalog, textsBag,
+  );
 
   // Destinos (visibles también al llegar: sos libre de seguir viajando sin entrar).
   const title = document.createElement('p');
@@ -216,10 +225,14 @@ export function renderWorldPanel(world, state, worldTexts, storiesBag, balance, 
   panel.appendChild(list);
 }
 
-// Acciones de la ciudad actual: "Entrar" (si no está registrada / al llegar)
-// y debajo "Explorar" (solo habilitado si la ciudad está ENTRADA y con saldo)
-// o la etiqueta "Explorada" + su historia. Quedan sobre la lista de destinos.
-function appendCityActions(world, state, worldTexts, storiesBag, balance, handlers, panel, arrived) {
+// Acciones de la ciudad actual: "Entrar" (si no está registrada / al llegar),
+// la etiqueta "Explorada" + su historia (historial permanente, ya no bloquea),
+// y debajo las tarjetas de la oferta O el botón Explorar. Quedan arriba de la
+// lista de destinos.
+function appendCityActions(
+  world, state, worldTexts, storiesBag, balance, handlers, panel, arrived,
+  decision, catalog, textsBag,
+) {
   const city = cityById(world, state.currentCity);
   const cityName = city ? city.name : state.currentCity;
   const entered = state.visited.includes(state.currentCity);
@@ -237,6 +250,8 @@ function appendCityActions(world, state, worldTexts, storiesBag, balance, handle
     panel.appendChild(enter);
   }
 
+  // El historial se sigue mostrando siempre como hoy; solo dejó de cortar el
+  // dibujo: en una estadía nueva vuelve a aparecer el botón Explorar.
   if (hasExplored(state, state.currentCity)) {
     const exploredTag = document.createElement('p');
     exploredTag.className = 'explored-tag';
@@ -254,29 +269,78 @@ function appendCityActions(world, state, worldTexts, storiesBag, balance, handle
     } else {
       console.warn('Falta la historia de la ciudad:', state.currentCity);
     }
+  }
+
+  // Con oferta válida: tarjetas y sin botón Explorar (no se cobra de nuevo).
+  if (decision.showOffer) {
+    appendOffer(panel, decision.offer, catalog, textsBag, handlers);
     return;
   }
 
-  // Explorar: nunca parcial — deshabilitado sin entrar o sin saldo suficiente.
-  const cost = exploreCost(world);
+  // Sin oferta: Explorar como siempre — nunca parcial.
   const explore = document.createElement('button');
   explore.type = 'button';
   explore.className = 'habit-btn neutral dest-explore';
   explore.textContent = fillText(textOf(worldTexts, 'exploreCostText'), {
     label: worldTexts.exploreButton,
-    cost,
+    cost: decision.cost,
   });
-  explore.disabled = !entered || balance < cost;
+  explore.disabled = decision.disabled;
   explore.addEventListener('click', handlers.onExploreCity);
   panel.appendChild(explore);
 
-  if (balance < cost) {
+  if (balance < decision.cost) {
     const missing = document.createElement('p');
     missing.className = 'dest-not-enough';
     missing.textContent = fillText(textOf(worldTexts, 'notEnoughExplore'), {
       balance,
-      missing: cost - balance,
+      missing: decision.cost - balance,
     });
     panel.appendChild(missing);
+  }
+}
+
+// 1 a 3 tarjetas (o el aviso corto si la oferta quedó vacía al ponerse todo).
+// Sin innerHTML: cada nodo se crea y se llena con textContent / atributos.
+function appendOffer(panel, offer, catalog, textsBag, handlers) {
+  const items = (Array.isArray(offer?.itemIds) ? offer.itemIds : [])
+    .map((id) => (catalog?.items ?? []).find((item) => item?.id === id))
+    .filter((item) => item && typeof item === 'object');
+
+  const list = document.createElement('div');
+  list.className = 'offer-cards';
+  for (const item of items) {
+    const card = document.createElement('div');
+    card.className = 'offer-card';
+
+    const art = document.createElement('div');
+    art.className = 'offer-art';
+    art.dataset.slot = item.slot; // el color por casillero vive en el CSS
+    if (typeof item.image === 'string' && item.image !== '') {
+      const image = document.createElement('img');
+      image.src = item.image;
+      image.alt = item.name;
+      art.appendChild(image);
+    } else {
+      art.textContent = item.name;
+    }
+    card.appendChild(art);
+
+    const equip = document.createElement('button');
+    equip.type = 'button';
+    equip.className = 'habit-btn neutral offer-equip';
+    equip.textContent = textOf(textsBag, 'equipItemLabel');
+    equip.addEventListener('click', () => handlers.onEquipItem(item.id));
+    card.appendChild(equip);
+
+    list.appendChild(card);
+  }
+  panel.appendChild(list);
+
+  if (items.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'offer-empty';
+    empty.textContent = textOf(textsBag, 'offerEmptyText');
+    panel.appendChild(empty);
   }
 }

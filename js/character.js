@@ -110,3 +110,47 @@ export function equipItem(state, catalog, itemId) {
 export function clearOffer(state) {
   return { ...state, offer: null };
 }
+
+// Una oferta solo es visible si corresponde a la ciudad actual y no hay viaje
+// en curso (defensa: nunca mostrar piezas de otra estadía ni durante el viaje).
+export function hasOfferFor(characterState, cityId) {
+  return characterState?.offer?.cityId === cityId;
+}
+
+export function visibleOffer(characterState, worldState) {
+  const offer = characterState?.offer;
+  if (!isPlainObject(offer) || !Array.isArray(offer.itemIds)) {
+    return null;
+  }
+  if (worldState?.trip || !hasOfferFor(characterState, worldState?.currentCity)) {
+    return null;
+  }
+  return offer;
+}
+
+// Detección del cambio de ciudad en un solo lugar, pura y testeable. Solo actúa
+// cuando currentCity cambió: el caller guarda el previousCityId devuelto, así
+// aplicarlo dos veces seguidas no genera dos ofertas ni cobra dos veces.
+// `arrivingTrip` es el viaje que llegó (se captura antes de settleArrival, que
+// borra el trip cuando era "con explorar"). El costo de esa exploración ya iba
+// pagado dentro del viaje: acá solo se genera la oferta, no se cobra.
+export function syncOfferOnCityChange({
+  previousCityId,
+  worldState,
+  characterState,
+  catalog,
+  arrivingTrip = null,
+  rng = Math.random,
+}) {
+  const currentCityId = worldState?.currentCity;
+  if (currentCityId === previousCityId) {
+    return { previousCityId: currentCityId, characterState, changed: false };
+  }
+  let next = clearOffer(characterState);
+  if (isPlainObject(arrivingTrip)
+    && arrivingTrip.withExplore === true
+    && arrivingTrip.dest === currentCityId) {
+    next = generateOffer(next, catalog, currentCityId, rng).state;
+  }
+  return { previousCityId: currentCityId, characterState: next, changed: true };
+}

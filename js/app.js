@@ -1,7 +1,10 @@
 // Orquestador: carga datos, define el estado de sesión, separa ACTUALIZAR
 // (updateState: efectos + guardado) de DIBUJAR (renderAll: solo lectura) y
 // conecta los 3 flujos (hábitos, mundo, respaldo) vía refresh().
-import { loadDays, loadCustomHabits } from './storage.js';
+import {
+  loadDays, loadCustomHabits, loadCharacterState, saveCharacterState,
+} from './storage.js';
+import { syncOfferOnCityChange } from './character.js';
 import { loadJSON } from './dataFiles.js';
 import { textOf } from './text.js';
 import {
@@ -53,6 +56,8 @@ async function main() {
   // Las historias por ciudad también viven en data/ (nada hardcodeado).
   const storiesData = await loadJSON('stories');
   const storiesBag = storiesData.stories ?? {};
+  // Catálogo del personaje: mismo loader (fetch con cache: 'no-store').
+  const itemsData = await loadJSON('items');
 
   // Plantillas con variables: se arman SIEMPRE con fillText, nunca concatenando
   // en código (los textos se editan en data/). Se leen una vez (son estáticas).
@@ -102,12 +107,16 @@ async function main() {
   saveWorldState(worldState);
   const worldTexts = world.texts ?? {};
   let currentView = 'hoy';
+  // Se inicializa ANTES del primer refresh(): la detección de cambio de ciudad
+  // solo actúa cuando currentCity difiere de este valor.
+  let previousCityId = worldState.currentCity;
 
   // Estado compartido de la sesión: lo mutan los flujos, lo lee el render.
   const session = {
     daysData: initialDays,
     levelsByHabit: getTodayLevels(initialDays),
     worldState,
+    characterState: loadCharacterState(),
   };
 
   function computeBalance() {
@@ -116,6 +125,12 @@ async function main() {
 
   // ACTUALIZAR: efectos sobre el estado (flujo del viaje + llegada) y guardado.
   function updateState() {
+    // Captura del viaje que puede llegar: settleArrival() borra el trip cuando
+    // era "Viajar, entrar y explorar", y necesitamos ese dato para generar la
+    // oferta de la ciudad nueva (incluido el caso "llegó con la app cerrada").
+    const trip = session.worldState.trip;
+    const arrivingTrip = trip ? { dest: trip.dest, withExplore: trip.withExplore } : null;
+
     // Viaje progresivo: mientras haya viaje activo, el saldo disponible fluye solo.
     if (flowBalanceToTrip(session.worldState, computeBalance()) > 0) {
       saveWorldState(session.worldState);
@@ -123,6 +138,20 @@ async function main() {
     // Al completarse el viaje, la llegada te deja en la ciudad destino.
     if (settleArrival(session.worldState)) {
       saveWorldState(session.worldState);
+    }
+
+    // Único lugar que decide cambio de oferta: solo si currentCity cambió.
+    const synced = syncOfferOnCityChange({
+      previousCityId,
+      worldState: session.worldState,
+      characterState: session.characterState,
+      catalog: itemsData,
+      arrivingTrip,
+    });
+    previousCityId = synced.previousCityId;
+    if (synced.characterState !== session.characterState) {
+      session.characterState = synced.characterState;
+      saveCharacterState(session.characterState);
     }
   }
 
@@ -140,7 +169,10 @@ async function main() {
     renderBalance(computeBalance(), balanceText, textsBag.balanceLabel);
     renderWorldMap(world, session.worldState, worldTexts);
     renderWorldBalance(computeBalance(), balanceText, textsBag.balanceLabel);
-    renderWorldPanel(world, session.worldState, worldTexts, storiesBag, computeBalance(), panelHandlers);
+    renderWorldPanel(
+      world, session.worldState, worldTexts, storiesBag, computeBalance(), panelHandlers,
+      session.characterState, itemsData, textsBag,
+    );
   }
 
   // Orquestador: todo cambio de estado pasa por acá (actualizar + dibujar).
@@ -149,7 +181,9 @@ async function main() {
     renderAll();
   }
 
-  const { panelHandlers } = createWorldFlow({ world, session, textsBag, computeBalance, refresh });
+  const { panelHandlers } = createWorldFlow({
+    world, session, textsBag, computeBalance, refresh, catalog: itemsData,
+  });
 
   setupHabitsFlow({ session, getHabits: () => habits, stepsPerPoint, maxSteps, textsBag, refresh });
   customFlow = setupCustomHabitsFlow({

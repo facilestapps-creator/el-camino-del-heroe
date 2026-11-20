@@ -9,12 +9,15 @@ import {
   enterCity,
   exploreCost,
   exploreCity,
+  exploreDecision,
   rollDragon,
   saveWorldState,
 } from './world.js';
+import { generateOffer, equipItem } from './character.js';
+import { saveCharacterState } from './storage.js';
 import { textOf, fillText } from './text.js';
 
-export function createWorldFlow({ world, session, textsBag, computeBalance, refresh }) {
+export function createWorldFlow({ world, session, textsBag, computeBalance, refresh, catalog }) {
   const worldTexts = world.texts ?? {};
 
   // Tras elegir opción (y la moneda si hay dragón), verificar el saldo.
@@ -104,8 +107,28 @@ export function createWorldFlow({ world, session, textsBag, computeBalance, refr
       refresh();
     },
     onExploreCity: () => {
-      exploreCity(world, session.worldState, computeBalance());
+      // Misma decisión que dibuja el panel: con oferta vigente no se cobra.
+      const decision = exploreDecision(
+        world, session.worldState, session.characterState, computeBalance(),
+      );
+      if (!decision.canExplore
+        || !exploreCity(world, session.worldState, computeBalance())) {
+        return;
+      }
       saveWorldState(session.worldState);
+      session.characterState = generateOffer(
+        session.characterState, catalog, session.worldState.currentCity,
+      ).state;
+      saveCharacterState(session.characterState);
+      refresh();
+    },
+    onEquipItem: (itemId) => {
+      const result = equipItem(session.characterState, catalog, itemId);
+      if (!result.ok) {
+        return;
+      }
+      session.characterState = result.state;
+      saveCharacterState(session.characterState);
       refresh();
     },
   };

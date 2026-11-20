@@ -243,6 +243,13 @@ Sin cambios de comportamiento (spec en `DECISIONES.md`, sección "Capas del cód
 - Mutadores sin guardar: las piezas 5/6 guardan con `saveCharacterState`. Sin pantalla ni textos nuevos; no se tocó `world.js`, `worldFlow.js` ni la UI.
 - **Probado**: `npm test` → **79/79** en verde, incluidos azar determinista, invariantes de la oferta, oferta anterior reutilizable, equipar/limpiar, ids desconocidos, normalización de storage y respaldo válido/sin clave/malformado. Commit local, sin push.
 
+### Pieza 5 — Explorar → oferta + tarjetas ✓ (2026-11-19, V2)
+
+- **Cambio de regla**: `explored` dejó de bloquear (es historial permanente para la etiqueta/historia); en una estadía nueva vuelve a aparecer Explorar y se cobra de nuevo. Costo sin cambios (40), cobrado **una vez por estadía** al generar la oferta; en «Viajar, entrar y explorar» ya va dentro del viaje. Tests M4/M5 actualizados.
+- `character.js`: `hasOfferFor`, `visibleOffer` (oculta si hay viaje o si `cityId` != ciudad actual) y **`syncOfferOnCityChange`** (función pura única, idempotente; limpia al cambiar de ciudad y genera la oferta solo si llegó un viaje `withExplore`). `world.js`: `exploreDecision` (misma decisión para dibujar y cobrar) y `exploreCity` sin bloqueo por `explored`.
+- `app.js`: carga `items.json` con `loadJSON`, `session.characterState`, `previousCityId` inicializado antes del primer `refresh()` y guardado tras cada cambio. `worldFlow.js`: `onExploreCity` usa la decisión, nuevo `onEquipItem`, sin «Ver objetos». `worldUI.js`: tarjetas con `data-slot`/color o `<img>` pixelado, botón «Ponerme», aviso «No quedan objetos.»; sin `innerHTML` nuevo. Textos nuevos solo en `data/texts.json`. CSS mobile-first de tarjetas.
+- **Probado**: `npm test` → **87/87** en verde (decisión de explorar, cambio de ciudad, cobro único, oferta invisible en viaje/mismatch, idempotencia, llegada con app cerrada). Smoke con clics reales: explorar (500→460), recargar (misma oferta, sin cobro, sin Explorar), «Ponerme» (sale de la oferta), última pieza → «No quedan objetos.», oferta oculta durante viaje, cancelar viaje → oferta intacta, «Viajar, entrar y explorar» (nueva oferta, cobro único +108) y vuelta (nueva oferta y cobro de nuevo); consola y red limpias, datos restaurados byte a byte. Commit local, sin push.
+
 ## Pendientes
 
 El plan vive en **[`docs/overview.md`](overview.md)** (Plan de trabajo, con los P1–P6

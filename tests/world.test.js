@@ -15,6 +15,7 @@ import {
   markerPosition,
   startTrip,
   exploreCost,
+  exploreDecision,
   hydrateRouteCosts,
 } from '../js/world.js';
 
@@ -121,7 +122,7 @@ test('e2) enterCity borra dragonRolls', () => {
   assert.ok(state.visited.includes('starkrock'));
 });
 
-test('f) exploreCity: falla sin saldo y sin ciudad visitada; funciona con saldo', () => {
+test('f) exploreCity: exige visita/saldo/sin viaje; "explored" ya NO bloquea (V2/P5)', () => {
   const costo = exploreCost(world);
   assert.equal(costo, 40); // 10 × 4
 
@@ -142,6 +143,21 @@ test('f) exploreCity: falla sin saldo y sin ciudad visitada; funciona con saldo'
   assert.equal(exploreCity(world, ok, 100), true);
   assert.equal(ok.spent, costo);
   assert.deepEqual(ok.explored, ['arvandill']);
+
+  // CAMBIO DE REGLA (M4/M5): estar en `explored` ya no impide explorar en una
+  // estadía nueva. El historial sigue permanente y no se duplica.
+  const otraEstadia = freshState('arvandill');
+  otraEstadia.visited = ['arvandill'];
+  otraEstadia.explored = ['arvandill'];
+  assert.equal(exploreCity(world, otraEstadia, 100), true);
+  assert.equal(otraEstadia.spent, costo);
+  assert.deepEqual(otraEstadia.explored, ['arvandill']);
+
+  // con viaje en curso no se cobra (defensa del req. 5)
+  const enViaje = freshState('arvandill');
+  startTrip(enViaje, 'vornstead', 10, false, false, null);
+  assert.equal(exploreCity(world, enViaje, 100), false);
+  assert.equal(enViaje.spent, 0);
 });
 
 test('g) settleArrival con plan "viajar, entrar y explorar"', () => {
@@ -245,4 +261,62 @@ test('M3: el world.json real sigue hidratando bien', () => {
     total += r.points;
   }
   assert.equal(total, 282);
+});
+
+// V2 / Pieza 5 — decisión del panel (misma que usa el handler para cobrar).
+test('V2 P5: con oferta válida se muestran tarjetas y NO se puede cobrar de nuevo', () => {
+  const state = freshState('arvandill');
+  const character = {
+    equipped: {},
+    offer: { cityId: 'arvandill', itemIds: ['casco-01'] },
+  };
+  const decision = exploreDecision(world, state, character, 100);
+  assert.equal(decision.showOffer, true);
+  assert.equal(decision.canExplore, false);
+  assert.equal(decision.reason, 'offer');
+  assert.equal(decision.cost, 40);
+  assert.equal(decision.entered, true);
+  assert.equal(state.spent, 0);
+});
+
+test('V2 P5: sin oferta, Explorar depende de visita/saldo/viaje (y "explored" no bloquea)', () => {
+  const character = { equipped: {}, offer: null };
+  const base = freshState('arvandill');
+  assert.equal(exploreDecision(world, base, character, 100).canExplore, true);
+  assert.equal(exploreDecision(world, base, character, 39).canExplore, false);
+  assert.equal(exploreDecision(world, base, character, 39).reason, 'insufficient');
+
+  const sinVisitar = freshState('starkrock');
+  assert.equal(exploreDecision(world, sinVisitar, character, 100).reason, 'notEntered');
+
+  const enViaje = freshState('arvandill');
+  startTrip(enViaje, 'vornstead', 10, false, false, null);
+  const viaje = exploreDecision(world, enViaje, character, 100);
+  assert.equal(viaje.canExplore, false);
+  assert.equal(viaje.reason, 'trip');
+
+  const yaExplorada = freshState('arvandill');
+  yaExplorada.explored = ['arvandill'];
+  assert.equal(exploreDecision(world, yaExplorada, character, 100).canExplore, true);
+});
+
+test('V2 P5: oferta de otra ciudad o con viaje en curso nunca se muestra', () => {
+  const state = freshState('arvandill');
+  const otraCiudad = {
+    equipped: {},
+    offer: { cityId: 'vornstead', itemIds: ['casco-01'] },
+  };
+  const fuera = exploreDecision(world, state, otraCiudad, 100);
+  assert.equal(fuera.showOffer, false);
+  assert.equal(fuera.canExplore, true); // vuelve a aparecer Explorar
+
+  const enViaje = freshState('arvandill');
+  startTrip(enViaje, 'vornstead', 10, false, false, null);
+  const actual = {
+    equipped: {},
+    offer: { cityId: 'arvandill', itemIds: ['casco-01'] },
+  };
+  const oculta = exploreDecision(world, enViaje, actual, 100);
+  assert.equal(oculta.showOffer, false);
+  assert.equal(oculta.reason, 'trip');
 });

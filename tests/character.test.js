@@ -5,12 +5,15 @@ import { readFileSync } from 'node:fs';
 import { resetLocalStorage } from './helpers/localStorage.js';
 import { CHARACTER_KEY } from '../js/config.js';
 import { loadCharacterState, saveCharacterState } from '../js/storage.js';
+import { settleArrival } from '../js/world.js';
 import {
   isValidCharacterState,
   getBag,
   generateOffer,
   equipItem,
   clearOffer,
+  visibleOffer,
+  syncOfferOnCityChange,
 } from '../js/character.js';
 
 const catalog = JSON.parse(
@@ -180,4 +183,120 @@ test('loadCharacterState normaliza datos malformados sin lanzar; saveCharacterSt
   } finally {
     console.warn = originalWarn;
   }
+});
+
+// V2 / Pieza 5 — la oferta solo se muestra en la ciudad actual y sin viaje.
+test('visibleOffer: solo con cityId actual y sin viaje en curso', () => {
+  const offer = { cityId: 'arvandill', itemIds: ['casco-01'] };
+  const character = makeState({}, offer);
+  assert.deepEqual(visibleOffer(character, { currentCity: 'arvandill', trip: null }), offer);
+  assert.equal(visibleOffer(character, { currentCity: 'vornstead', trip: null }), null);
+  assert.equal(visibleOffer(character, {
+    currentCity: 'arvandill',
+    trip: { dest: 'vornstead' },
+  }), null);
+  assert.equal(visibleOffer(makeState(), { currentCity: 'arvandill', trip: null }), null);
+});
+
+test('syncOfferOnCityChange: sin cambio de ciudad no hace nada (idempotencia)', () => {
+  const character = makeState({}, { cityId: 'arvandill', itemIds: ['casco-01'] });
+  const result = syncOfferOnCityChange({
+    previousCityId: 'arvandill',
+    worldState: { currentCity: 'arvandill', trip: null },
+    characterState: character,
+    catalog,
+    arrivingTrip: { dest: 'arvandill', withExplore: true },
+    rng: () => 0,
+  });
+  assert.equal(result.changed, false);
+  assert.equal(result.characterState, character);
+  assert.deepEqual(result.characterState.offer, character.offer);
+});
+
+test('syncOfferOnCityChange: cambia de ciudad → limpia; con viaje con explorar genera la nueva', () => {
+  const character = makeState(
+    { casco: 'casco-01' },
+    { cityId: 'arvandill', itemIds: ['armadura-01'] },
+  );
+  const worldState = { currentCity: 'vornstead', trip: null };
+  const result = syncOfferOnCityChange({
+    previousCityId: 'arvandill',
+    worldState,
+    characterState: character,
+    catalog,
+    arrivingTrip: { dest: 'vornstead', withExplore: true },
+    rng: () => 0,
+  });
+  assert.equal(result.changed, true);
+  assert.equal(result.previousCityId, 'vornstead');
+  assert.equal(result.characterState.offer.cityId, 'vornstead');
+  assert.equal(result.characterState.offer.itemIds.length, 1);
+  assert.deepEqual(result.characterState.equipped, { casco: 'casco-01' });
+  assert.equal(character.offer.cityId, 'arvandill'); // no mutó el estado de entrada
+
+  // Aplicarlo de nuevo con el previousCityId devuelto no genera otra oferta.
+  const again = syncOfferOnCityChange({
+    previousCityId: result.previousCityId,
+    worldState,
+    characterState: result.characterState,
+    catalog,
+    arrivingTrip: { dest: 'vornstead', withExplore: true },
+    rng: () => 0,
+  });
+  assert.equal(again.changed, false);
+  assert.equal(again.characterState, result.characterState);
+  assert.deepEqual(again.characterState.offer, result.characterState.offer);
+});
+
+test('syncOfferOnCityChange: viaje normal no genera oferta; cancelar viaje la mantiene', () => {
+  const character = makeState({}, { cityId: 'arvandill', itemIds: ['casco-01'] });
+  const normal = syncOfferOnCityChange({
+    previousCityId: 'arvandill',
+    worldState: { currentCity: 'vornstead', trip: { dest: 'vornstead', withExplore: false } },
+    characterState: character,
+    catalog,
+    arrivingTrip: { dest: 'vornstead', withExplore: false },
+    rng: () => 0,
+  });
+  assert.equal(normal.changed, true);
+  assert.equal(normal.characterState.offer, null);
+
+  // Cancelar: currentCity NO cambia → la oferta sigue intacta.
+  const cancel = syncOfferOnCityChange({
+    previousCityId: 'arvandill',
+    worldState: { currentCity: 'arvandill', trip: null },
+    characterState: character,
+    catalog,
+    arrivingTrip: null,
+    rng: () => 0,
+  });
+  assert.equal(cancel.changed, false);
+  assert.deepEqual(cancel.characterState.offer, character.offer);
+});
+
+test('syncOfferOnCityChange: viaje completado con la app cerrada se detecta al abrir', () => {
+  // estado guardado: el viaje ya llegó pero settleArrival todavía no corrió.
+  const savedWorld = {
+    currentCity: 'arvandill',
+    visited: ['arvandill'],
+    explored: [],
+    trip: { dest: 'vornstead', cost: 100, progress: 100, withExplore: true },
+  };
+  const previousCityId = savedWorld.currentCity; // se inicializa antes del primer refresh
+  const trip = savedWorld.trip;
+  const arrivingTrip = { dest: trip.dest, withExplore: trip.withExplore };
+
+  settleArrival(savedWorld); // lo que hace el primer refresh() de app.js
+  const result = syncOfferOnCityChange({
+    previousCityId,
+    worldState: savedWorld,
+    characterState: makeState(),
+    catalog,
+    arrivingTrip,
+    rng: () => 0,
+  });
+  assert.equal(savedWorld.currentCity, 'vornstead');
+  assert.ok(savedWorld.explored.includes('vornstead'));
+  assert.equal(result.characterState.offer.cityId, 'vornstead');
+  assert.equal(result.characterState.offer.itemIds.length, 1);
 });

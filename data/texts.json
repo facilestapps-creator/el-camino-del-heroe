@@ -43,6 +43,8 @@
     "customErrorMin": "Escribí el esfuerzo mínimo de hasta 40 caracteres.",
     "customErrorFull": "Escribí el esfuerzo completo de hasta 40 caracteres.",
     "customErrorSlots": "Ya tenés 3 lugares ocupados hoy.",
-    "customArchiveConfirm": "Al archivar «{label}» se envían sus puntos de hoy y el lugar queda ocupado hasta mañana. ¿Continuar?"
+    "customArchiveConfirm": "Al archivar «{label}» se envían sus puntos de hoy y el lugar queda ocupado hasta mañana. ¿Continuar?",
+    "equipItemLabel": "Ponerme",
+    "offerEmptyText": "No quedan objetos."
   }
 }
